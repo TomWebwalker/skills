@@ -1,6 +1,6 @@
 # Skills That Travel Between Repos
 
-[![skills.sh](https://skills.sh/b/TomWebwalker/skills)](https://skills.sh/TomWebwalker/skills)
+[![Install with npx skills](https://img.shields.io/badge/install-npx%20skills-black?logo=npm)](https://www.skills.sh/TomWebwalker/skills)
 
 Agent skills for everyday delivery work—config-driven, so the same commands work in every repository you own.
 
