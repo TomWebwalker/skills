@@ -1,14 +1,27 @@
 # Skills That Travel Between Repos
 
+[![skills.sh](https://skills.sh/b/TomWebwalker/skills)](https://skills.sh/TomWebwalker/skills)
+
 Agent skills for everyday delivery work—config-driven, so the same commands work in every repository you own.
 
 Most workflow skills rot the moment you reuse them. They hardcode one issue tracker, one branch name, one framework—so `/start-issue` only works in the repo it was written for. Copy it elsewhere and it lies about your tooling.
 
 These skills separate the *process* (universal) from the *parameters* (per-repo). The skill carries the steps; each repository supplies its own tooling knowledge through four small config files. Onboard a repo once, and `/start-issue`, `/qa-local`, and `/finalize-feature` adapt to it—Linear or GitHub, `develop` or `main`, Angular or Next.js, commitlint or not.
 
-## Quickstart (one-time per repo)
+## Quickstart
 
-1. Make the skills available to your agent by symlinking them into `~/.claude/skills/`:
+1. Install the skills into your agent with the [`skills`](https://github.com/vercel-labs/skills) CLI:
+
+   ```bash
+   npx skills@latest add TomWebwalker/skills
+   ```
+
+   Select the skills and agent you want when prompted (or add `-g -y` for a
+   non-interactive install). Use `--list` to preview, or `--skill <name>` to pick
+   specific ones. Re-run the command later to pull updates.
+
+   <details>
+   <summary>Prefer to manage them yourself? Symlink instead.</summary>
 
    ```bash
    git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
@@ -17,6 +30,8 @@ These skills separate the *process* (universal) from the *parameters* (per-repo)
      ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
    done
    ```
+
+   </details>
 
 2. In any repo you want to onboard, run **`/setup-project-skills`**. It will:
    - Detect and confirm your **issue tracker** (Linear, GitHub, or none)
