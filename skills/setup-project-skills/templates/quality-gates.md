@@ -1,61 +1,141 @@
 ---
-# docs/agents/quality-gates.md — commit rules and pre-push checks CI enforces.
+# docs/agents/quality-gates.md — commit rules and pre-push checks this repo enforces.
+# Every value is an EXAMPLE. Mirror what CI actually runs; delete what doesn't apply.
 commit:
-  convention: conventional      # conventional | none
-  ticket_ref: 'header-suffix'   # where the ticket id goes: header-suffix '[PC-1234]' | none
-  commitlint: true              # repo runs commitlint in CI (validate full message before commit)
-  coauthor_line: 'Co-Authored-By: Claude <noreply@anthropic.com>'  # '' to omit
-gates:                          # run in order before push; fix failures before continuing
-  - { name: test,  cmd: npm test }
-  - { name: lint,  cmd: npm run lint }
-  - { name: build, cmd: npm run build }
-  - { name: duplication, cmd: jscpd }   # see "Duplication" below for the full invocation
+  convention: conventional    # conventional | none | custom
+  ticket_ref: none            # header-suffix '[ABC-123]' | header-prefix | footer | none
+  coauthor_line: ''           # e.g. 'Co-Authored-By: Claude <noreply@anthropic.com>' ('' to omit)
+  validator: ''               # command that lints a message on stdin, '' = no validator
+                              #   commitlint: 'npx commitlint'
+                              #   gitlint:    'gitlint'
+                              #   cog:        'cog verify --file -'
+  rules: ''                   # free-text summary of the limits that bite (see below)
+gates:                        # run in order before push; fix failures before continuing
+  # Reference stack.md commands rather than repeating them where possible.
+  - { name: test,  cmd: 'stack.commands.test' }
+  - { name: lint,  cmd: 'stack.commands.lint' }
+  - { name: build, cmd: 'stack.commands.build' }
 dup_check:
-  enabled: true
-  min_tokens: 100
-  min_lines: 10
-  ignore: '**/node_modules/**,**/dist/**,**/coverage/**,**/*.spec.ts,**/*.spec.js,**/test-setup.ts,**/jest.config.ts,**/jest.preset.js,**/*.stories.ts,**/.storybook/**,**/e2e/**'
+  enabled: false              # true only if CI/Sonar enforces a duplication rule
+  cmd: ''                     # full command, e.g. the jscpd invocation below
+  scope: changed-files        # changed-files | whole-repo — what must be clean for this PR
+loop:                         # settings for /loop (build → verify → repeat)
+  max_cycles: 5               # cycle budget before the loop hands back to a human
+  builder_agent: builder      # subagent that writes/fixes code ('' = run inline)
+  checker_agent: checker      # subagent that runs verify-feature ('' = run inline)
+  on_exhausted: stop-and-report   # stop-and-report | ask
 ---
 
 # Quality gates
 
 ## Commit messages
-When `commit.commitlint: true`, CI lints the **entire** message (header + body +
-footer), not just the first line. Validate before committing — never `--no-verify`:
+
+Write messages in the configured `convention`. Place the ticket id per `ticket_ref`,
+and append `coauthor_line` if set.
+
+When `commit.validator` is non-empty, CI lints the **entire** message (header, body,
+and footer) — not just the first line. Validate before committing, and never bypass
+with `--no-verify`:
 
 ```bash
 cat > /tmp/commit-msg.txt <<'EOF'
-<type>(<scope>): <subject> [<TICKET>]     # [<TICKET>] only when ticket_ref = header-suffix
-
-<body, hard-wrapped at <= 100 chars per physical line>
-
-<coauthor_line>                            # omit if coauthor_line is empty
+<message, formatted per convention and ticket_ref>
 EOF
-npx commitlint < /tmp/commit-msg.txt        # must exit 0
+<commit.validator> < /tmp/commit-msg.txt   # must exit 0
 git commit -F /tmp/commit-msg.txt
 ```
 
-Rules that bite (`@commitlint/config-conventional`):
-- `header-max-length` ≤ 100 chars (type+scope+subject including the `[TICKET]` suffix).
-- `body-max-line-length` / `footer-max-line-length`: **every physical line** ≤ 100.
-  A single long `-m "paragraph"` is ONE line and will fail — hard-wrap or omit the body.
-- `body-leading-blank` / `footer-leading-blank`: blank line before body and footer.
+Record the limits that actually fail builds in `commit.rules` so an agent doesn't have
+to rediscover them. Common ones:
 
-## Duplication (Sonar PR rule mirror)
-When `dup_check.enabled`, run before push and refactor any clone that touches a file
-this branch changed (`git diff --name-only <base>...HEAD`):
+- header length cap (often 72 or 100 chars, **including** any ticket suffix)
+- per-**physical-line** body/footer length caps — a single long `-m "paragraph"` is one
+  line and will fail; hard-wrap the body or omit it
+- a blank line required before the body and before the footer
+
+If `validator` is empty, still write clean conventional messages — just skip the
+validation step.
+
+## Duplication
+
+Only relevant when a code-quality service (Sonar, Qodana, CodeClimate) fails PRs on
+duplicated blocks. Set `dup_check.enabled: true` and put the exact command in
+`dup_check.cmd`. With `scope: changed-files`, refactor only clones that touch a file
+this branch changed:
 
 ```bash
-npx --yes jscpd@latest --min-tokens 100 --min-lines 10 \
-  --reporters consoleFull --silent \
-  --ignore "<dup_check.ignore>" \
-  <stack.source_paths>      # e.g. apps libs
+git diff --name-only <base_branch>...HEAD
 ```
 
 Pre-existing clones in untouched files may be left for this PR.
 
+## Loop
+
+`/loop` builds and verifies in cycles until the gates above pass. `loop.max_cycles`
+caps how long it tries before handing back to a human; the loop also stops early on
+its own when it isn't converging (see the skill for the full list).
+
+Leave `builder_agent`/`checker_agent` at their defaults unless this repo has better
+ones. Set them to `''` to run both roles inline without subagents. If
+`stack.md#fix_agent` is set, `/loop` prefers it over the generic builder.
+
+## Worked examples
+
+<details><summary>Node + commitlint + jscpd (Sonar mirror)</summary>
+
+```yaml
+commit:
+  convention: conventional
+  ticket_ref: header-suffix
+  validator: 'npx commitlint'
+  rules: 'header <= 100 chars incl. [TICKET]; every body/footer line <= 100; blank line before body and footer'
+gates:
+  - { name: test,  cmd: 'stack.commands.test' }
+  - { name: lint,  cmd: 'stack.commands.lint' }
+  - { name: build, cmd: 'stack.commands.build' }
+  - { name: duplication, cmd: 'see dup_check.cmd' }
+dup_check:
+  enabled: true
+  scope: changed-files
+  cmd: >-
+    npx --yes jscpd@latest --min-tokens 100 --min-lines 10
+    --reporters consoleFull --silent
+    --ignore "**/node_modules/**,**/dist/**,**/coverage/**,**/*.spec.*,**/*.test.*,**/e2e/**"
+    apps libs
+```
+</details>
+
+<details><summary>Python, pre-commit runs everything</summary>
+
+```yaml
+commit:
+  convention: conventional
+  ticket_ref: footer
+  validator: 'gitlint'
+gates:
+  - { name: hooks,     cmd: 'pre-commit run --all-files' }
+  - { name: typecheck, cmd: 'stack.commands.typecheck' }
+  - { name: test,      cmd: 'stack.commands.test' }
+dup_check: { enabled: false }
+```
+</details>
+
+<details><summary>Go, no commit convention</summary>
+
+```yaml
+commit: { convention: none, ticket_ref: none, validator: '' }
+gates:
+  - { name: vet,   cmd: 'go vet ./...' }
+  - { name: lint,  cmd: 'stack.commands.lint' }
+  - { name: test,  cmd: 'go test -race ./...' }
+  - { name: build, cmd: 'stack.commands.build' }
+dup_check: { enabled: false }
+```
+</details>
+
 ## Adapting
-- No commitlint? set `commitlint: false` — still write conventional messages, but skip
-  the validation dance.
-- No Sonar/jscpd? set `dup_check.enabled: false` and drop the `duplication` gate.
-- Adjust the `gates` list to match what this repo's CI actually runs.
+
+- No validator? `validator: ''` — write good messages, skip the check.
+- No duplication service? `dup_check.enabled: false` and drop the gate.
+- Gates should mirror CI exactly. A gate CI doesn't run is wasted local time; a CI
+  check missing from `gates` is a surprise failure after push.
