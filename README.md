@@ -1,12 +1,23 @@
 # Skills That Travel Between Repos
 
 [![Install with npx skills](https://img.shields.io/badge/install-npx%20skills-black?logo=npm)](https://www.skills.sh/TomWebwalker/skills)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-Agent skills for everyday delivery work—config-driven, so the same commands work in every repository you own.
+Agent skills for everyday delivery work—config-driven, so the same commands work in
+every repository you own, whatever it's built with.
 
-Most workflow skills rot the moment you reuse them. They hardcode one issue tracker, one branch name, one framework—so `/start-issue` only works in the repo it was written for. Copy it elsewhere and it lies about your tooling.
+Most workflow skills rot the moment you reuse them. They hardcode one issue tracker,
+one branch name, one package manager—so `/start-issue` only works in the repo it was
+written for. Copy it elsewhere and it lies about your tooling.
 
-These skills separate the *process* (universal) from the *parameters* (per-repo). The skill carries the steps; each repository supplies its own tooling knowledge through four small config files. Onboard a repo once, and `/start-issue`, `/qa-local`, and `/finalize-feature` adapt to it—Linear or GitHub, `develop` or `main`, Angular or Next.js, commitlint or not.
+These skills separate the *process* (universal) from the *parameters* (per-repo). The
+skill carries the steps; each repository supplies its own tooling knowledge through
+four small config files. Onboard a repo once, and `/start-issue`, `/qa-local`, `/loop` and
+`/finalize-feature` adapt to it—Linear, GitHub Issues, Jira or nothing; `develop` or
+`main`; npm, uv, cargo, go or maven; a browser UI, an HTTP API or a CLI.
+
+**Nothing here assumes a language or a frontend.** The only hard requirements are
+`git` and an agent that can run shell commands.
 
 ## Quickstart
 
@@ -26,48 +37,115 @@ These skills separate the *process* (universal) from the *parameters* (per-repo)
    ```bash
    git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
    cd ~/projects/claude-skills
-   for s in setup-project-skills start-issue qa-local finalize-feature; do
+   for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop; do
      ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
    done
+   ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
+   ln -sfn "$PWD/agents/checker.md" ~/.claude/agents/checker.md
    ```
 
    </details>
 
 2. In any repo you want to onboard, run **`/setup-project-skills`**. It will:
-   - Detect and confirm your **issue tracker** (Linear, GitHub, or none)
+   - Detect and confirm your **issue tracker** (Linear, GitHub, Jira, GitLab, or none)
    - Detect and confirm your **branching model** (base branch, branch naming, PR target)
-   - Detect and confirm your **stack** (framework, fix agent, run/test/build commands)
+   - Detect and confirm your **stack** (language, package manager, commands, QA mode)
    - Detect and confirm your **quality gates** (commit rules, pre-push checks)
 
-3. Ready to begin. `/start-issue`, `/qa-local`, and `/finalize-feature` now read that config.
+   It reads whichever manifest your repo actually has—`package.json`, `pyproject.toml`,
+   `go.mod`, `Cargo.toml`, `pom.xml`, `Gemfile`, `Makefile`—and takes gates from your
+   CI config so local checks mirror what CI enforces.
+
+3. **Optional — install the subagents for `/loop`.** `npx skills` installs skills, not
+   subagents, so copy the two bundled roles in yourself:
+
+   ```bash
+   mkdir -p ~/.claude/agents
+   curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/builder.md -o ~/.claude/agents/builder.md
+   curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/checker.md -o ~/.claude/agents/checker.md
+   ```
+
+   Skip it if you like — `/loop` runs both roles inline when the subagents are absent.
+   Separate agents are better, though: the builder never sees the full gate output and
+   the checker never sees the diff rationale, which is most of why the split works.
+
+4. Ready to begin. Every skill now reads that config.
 
 ## Why These Skills Exist
 
-A workflow skill encodes a *process*—commit, rebase, run gates, push, open a PR, update the ticket. That process is the same everywhere. What changes between repos is the *parameters*: which tracker, which branch, which commands. Hardcoding the parameters into the process is what makes a skill non-portable.
+A workflow skill encodes a *process*—commit, rebase, run gates, push, open a PR,
+update the ticket. That process is the same everywhere. What changes between repos is
+the *parameters*: which tracker, which branch, which commands. Hardcoding the
+parameters into the process is what makes a skill non-portable.
 
 ### The seam: process is universal, parameters are per-repo
 
-`setup-project-skills` writes four config files into the target repo under `docs/agents/`, plus a pointer block in `CLAUDE.md`/`AGENTS.md`. The other skills *read* that config at runtime instead of assuming anything.
+`setup-project-skills` writes four config files into the target repo under
+`docs/agents/`, plus a pointer block in `CLAUDE.md`/`AGENTS.md`. The other skills
+*read* that config at runtime instead of assuming anything.
 
 ```
 skills/                                    each onboarded repo/
   setup-project-skills/   ──writes──>        docs/agents/
   start-issue/            ──reads───>          issue-tracker.md   # tracker, ticket ids, statuses
-  qa-local/               ──reads───>          vcs.md             # base branch, branch naming, PR target
-  finalize-feature/       ──reads───>          stack.md           # framework, fix agent, commands
-                                              quality-gates.md   # commit rules, pre-push checks
-                                            CLAUDE.md  (## Agent skills pointer block)
+  verify-feature/         ──reads───>          vcs.md             # base branch, branch naming, PR target
+  qa-local/               ──reads───>          stack.md           # language, commands, QA mode
+  finalize-feature/       ──reads───>          quality-gates.md   # commit rules, gates, loop settings
+  loop/                   ──reads───>        CLAUDE.md  (## Agent skills pointer block)
 ```
 
-Knowledge that can't be inferred—like validating a full commit message against commitlint, or mirroring Sonar's duplication rule—stays in the skill as *procedure*. Only the project-specific values (the ticket-id suffix, the ignore globs, the source paths) move to config. Annotated schemas for every key live in [`skills/setup-project-skills/templates/`](./skills/setup-project-skills/templates/).
+Knowledge that can't be inferred—how to validate a full commit message against your
+linter, or how your duplication rule is scoped—stays in the skill as *procedure*.
+Only project-specific values (the ticket-id pattern, the command map, the source
+paths) move to config. Annotated schemas for every key, each with worked examples
+across ecosystems, live in
+[`skills/setup-project-skills/templates/`](./skills/setup-project-skills/templates/).
+
+### QA isn't only a browser
+
+`stack.md#qa_mode` tells `/qa-local` how a human verifies this project: `browser` for
+a UI, `api` for an HTTP service (concrete `curl` calls and expected responses), `cli`
+for a binary, `tui`, or `none` for a library where the automated gates are the whole
+story. A backend repo gets backend QA, not "open localhost in Chrome".
+
+### The loop is config-driven too
+
+`/loop` takes a task and drives it to green without supervision:
+
+```
+/loop add rate limiting to the token refresh endpoint
+```
+
+It branches (or stays put if you're already on a feature branch), writes a one-line
+brief, then alternates **builder** → **checker** until `/verify-feature` returns
+`ALL GREEN`. The two roles are deliberately separated: the builder writes code and
+never runs the gates, the checker runs the gates and never writes code. A single agent
+doing both drifts toward declaring itself done.
+
+What stops it is in `quality-gates.md#loop`, not in a `CLAUDE.md` paragraph:
+`max_cycles` caps the budget, and the loop also bails early when the same failure
+repeats twice, when the builder says it's blocked, or when the only way to green would
+be to weaken a check. On success it stops and *offers* `/finalize-feature` rather than
+pushing — an unattended loop that opens PRs just turns a wrong brief into a wrong PR
+faster.
 
 ### Graceful when a repo isn't onboarded
 
-Every skill opens by loading its config and naming a fallback. Run a skill in a repo that has never seen `/setup-project-skills` and it degrades sensibly (tracker → none, base → `main`) or points you at setup—it never hard-fails on a missing assumption.
+Every skill opens by loading its config and naming a fallback. Run a skill in a repo
+that has never seen `/setup-project-skills` and it degrades sensibly (tracker →
+`none`, base → the remote's default branch) or points you at setup—it never hard-fails
+on a missing assumption. Commands that don't apply are left empty, and skills skip
+those steps out loud rather than inventing a command.
 
 ### Proven across opposite repos
 
-The same four skills drive a Linear + Angular/Nx monorepo (`develop` branch, `feature/PC-1234`, commitlint, jscpd) and a GitHub + Next.js app (`main`, `<type>/<slug>` branches, no commitlint) with no edits—only different `docs/agents/` files. The original tightly-coupled versions are kept under [`examples/linear-angular/`](./examples/linear-angular/) as the worked reference.
+The same four skills drive a Linear + Angular/Nx monorepo (`develop`,
+`feature/PC-1234`, commitlint, jscpd, browser QA), a GitHub Issues + Python/FastAPI
+service (`main`, pre-commit, `uv`, API QA against `curl`), and a Go CLI with no
+tracker at all (slug branches, `go test -race`, CLI QA)—with no edits, only different
+`docs/agents/` files. All three config sets are in
+[`examples/configs/`](./examples/configs/). The original tightly-coupled skills are
+kept under [`examples/linear-angular/`](./examples/linear-angular/) as the before-shot.
 
 ## Reference
 
@@ -82,12 +160,26 @@ Run once per repo.
 Config-driven, daily-use delivery skills.
 
 - **[start-issue](./skills/start-issue/SKILL.md)** — Update the base branch, create a feature branch for a ticket, and set the ticket in progress.
-- **[qa-local](./skills/qa-local/SKILL.md)** — Guide a developer through a ticket's QA steps locally in the browser, fixing issues as they surface.
-- **[finalize-feature](./skills/finalize-feature/SKILL.md)** — Commit, rebase on the base branch, run quality gates, push, open a PR, and write QA notes on the ticket.
+- **[verify-feature](./skills/verify-feature/SKILL.md)** — Run every configured quality gate and report exactly what failed. Never edits code.
+- **[qa-local](./skills/qa-local/SKILL.md)** — Guide a developer through a ticket's QA steps locally—browser, API, or CLI—fixing issues as they surface.
+- **[finalize-feature](./skills/finalize-feature/SKILL.md)** — Commit, rebase on the base branch, verify, push, open a PR, and write QA notes on the ticket.
+
+### Automation
+
+- **[loop](./skills/loop/SKILL.md)** — Build, verify, repeat until the gates pass. Dispatches [`builder`](./agents/builder.md) to write code and [`checker`](./agents/checker.md) to run `/verify-feature`, feeding failures back until green or the cycle budget runs out.
 
 ## Adding a new skill
 
 1. Add `skills/<name>/SKILL.md`.
-2. Open it with a **"Load config first"** block that reads the relevant `docs/agents/*.md` and defines a fallback when config is absent.
-3. Reference config keys (e.g. `vcs.md#base_branch`) instead of literal values.
-4. Symlink it into `~/.claude/skills/`.
+2. Open it with a **"Load config first"** block that reads the relevant
+   `docs/agents/*.md` and defines a fallback when config is absent.
+3. Reference config keys (e.g. `vcs.md#base_branch`, `stack.md#commands.test`) instead
+   of literal values. If you catch yourself typing `npm`, `develop`, `Linear`, or
+   `localhost:4200`, that value belongs in config. Stop conditions and budgets are
+   config too — they're the first thing that differs between teams.
+4. Handle the empty case: an unset command means skip the step and say so, not guess.
+5. Symlink it into `~/.claude/skills/`.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
