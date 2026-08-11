@@ -13,9 +13,9 @@ written for. Copy it elsewhere and it lies about your tooling.
 These skills separate the *process* (universal) from the *parameters* (per-repo). The
 skill carries the steps; each repository supplies its own tooling knowledge through
 small config files under `docs/agents/`. Onboard a repo once, and `/start-issue`,
-`/qa-local`, `/loop` and `/finalize-feature` adapt to it—Linear, GitHub Issues, Jira
-or nothing; `develop` or `main`; npm, uv, cargo, go or maven; a browser UI, an HTTP
-API or a CLI; full-stack or a split UI/API with a companion repo.
+`/verify-feature`, `/qa-local`, `/loop`, and `/finalize-feature` adapt to it—Linear,
+GitHub Issues, Jira or nothing; `develop` or `main`; npm, uv, cargo, go or maven; a
+browser UI, an HTTP API or a CLI; full-stack or a split UI/API with a companion repo.
 
 **Nothing here assumes a language or a frontend.** The only hard requirements are
 `git` and an agent that can run shell commands.
@@ -129,9 +129,9 @@ doing both drifts toward declaring itself done.
 What stops it is in `quality-gates.md#loop`, not in a `CLAUDE.md` paragraph:
 `max_cycles` caps the budget, and the loop also bails early when the same failure
 repeats twice, when the builder says it's blocked, or when the only way to green would
-be to weaken a check. On success it stops and *offers* `/finalize-feature` rather than
-pushing — an unattended loop that opens PRs just turns a wrong brief into a wrong PR
-faster.
+be to weaken a check. On success it asks whether `/qa-local` is needed (skipped when
+`qa_mode` is `none`), then *offers* `/finalize-feature` rather than pushing — an
+unattended loop that opens PRs just turns a wrong brief into a wrong PR faster.
 
 When `topology.md` says the repo is a split **frontend** or **backend**, `/loop`
 optionally reads the companion API or UI repo before building — only if the task needs
@@ -147,7 +147,7 @@ those steps out loud rather than inventing a command.
 
 ### Proven across opposite repos
 
-The same four skills drive a Linear + Angular/Nx monorepo (`develop`,
+The same skills drive a Linear + Angular/Nx monorepo (`develop`,
 `feature/PC-1234`, commitlint, jscpd, browser QA), a GitHub Issues + Python/FastAPI
 service (`main`, pre-commit, `uv`, API QA against `curl`), and a Go CLI with no
 tracker at all (slug branches, `go test -race`, CLI QA)—with no edits, only different
@@ -155,26 +155,63 @@ tracker at all (slug branches, `go test -race`, CLI QA)—with no edits, only di
 [`examples/configs/`](./examples/configs/). The original tightly-coupled skills are
 kept under [`examples/linear-angular/`](./examples/linear-angular/) as the before-shot.
 
-## Reference
+## Skills in this repo
+
+Six skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
+Install path for each skill is `skills/<name>/`; agents are single markdown files.
 
 ### Setup
 
 Run once per repo.
 
-- **[setup-project-skills](./skills/setup-project-skills/SKILL.md)** — Detect, confirm, and write the repo's `docs/agents/` config (issue tracker, vcs, stack, quality gates, topology) so the workflow skills adapt to it.
+| Skill | What it does |
+|---|---|
+| **[setup-project-skills](./skills/setup-project-skills/SKILL.md)** | Detect, confirm, and write `docs/agents/` (issue tracker, vcs, stack, quality gates, topology) so every other skill can adapt. |
 
 ### Workflow
 
-Config-driven, daily-use delivery skills.
+Daily delivery. Each skill loads only the config files it needs and degrades when they are missing.
 
-- **[start-issue](./skills/start-issue/SKILL.md)** — Update the base branch, create a feature branch for a ticket, and set the ticket in progress.
-- **[verify-feature](./skills/verify-feature/SKILL.md)** — Run every configured quality gate and report exactly what failed. Never edits code.
-- **[qa-local](./skills/qa-local/SKILL.md)** — Guide a developer through a ticket's QA steps locally—browser, API, or CLI—fixing issues as they surface.
-- **[finalize-feature](./skills/finalize-feature/SKILL.md)** — Commit, rebase on the base branch, verify, push, open a PR, and write QA notes on the ticket.
+| Skill | What it does |
+|---|---|
+| **[start-issue](./skills/start-issue/SKILL.md)** | Update the base branch, create a feature branch for a ticket, set the ticket in progress. |
+| **[verify-feature](./skills/verify-feature/SKILL.md)** | Run every configured quality gate and report exactly what failed. Never edits code. |
+| **[qa-local](./skills/qa-local/SKILL.md)** | Guide local QA — browser, API, or CLI — fixing issues as they surface. Mode comes from `stack.md#qa_mode`. |
+| **[finalize-feature](./skills/finalize-feature/SKILL.md)** | Commit, rebase on the base branch, verify, push, open a PR, write QA notes on the ticket. |
 
 ### Automation
 
-- **[loop](./skills/loop/SKILL.md)** — Build, verify, repeat until the gates pass. Dispatches [`builder`](./agents/builder.md) to write code and [`checker`](./agents/checker.md) to run `/verify-feature`, feeding failures back until green or the cycle budget runs out. For split stacks, optionally consults `topology.md`'s companion repo before building.
+| Skill | What it does |
+|---|---|
+| **[loop](./skills/loop/SKILL.md)** | Build → verify until green (or the cycle budget / stop conditions). Optionally pulls companion knowledge from `topology.md`. On green: ask for `/qa-local` (skip when `qa_mode` is `none`), then offer `/finalize-feature` — never push unattended. |
+
+Typical happy path:
+
+```
+/setup-project-skills   (once per repo)
+        │
+        ▼
+/start-issue ──► implement ──► /verify-feature ──► /qa-local ──► /finalize-feature
+                     ▲                │
+                     └──── /loop ─────┘
+              (builder ↔ checker until green, then QA ask)
+```
+
+### Agents (for `/loop`)
+
+Optional subagents. `/loop` runs the same roles inline when these files are not installed.
+
+| Agent | Role |
+|---|---|
+| **[builder](./agents/builder.md)** | Writes and fixes code. Never runs the gates. `/loop` may dispatch `stack.md#fix_agent` instead when set. |
+| **[checker](./agents/checker.md)** | Runs `/verify-feature` and reports `ALL GREEN` or `FAILED`. Never edits. |
+
+### Examples
+
+| Path | Purpose |
+|---|---|
+| [`examples/configs/`](./examples/configs/) | Filled-in `docs/agents/` for Angular/Nx, FastAPI, and a Go CLI. |
+| [`examples/linear-angular/`](./examples/linear-angular/) | Pre-refactor hardcoded skills — historical reference only; do not install. |
 
 ## Adding a new skill
 

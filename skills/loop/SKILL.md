@@ -60,9 +60,13 @@ it knows the framework.
 7. **Count out loud.** Announce the cycle number before each build ("cycle 2 of 5").
    Stop at `loop.max_cycles`.
 8. **Finish.** On green, stop and show the result: what changed, which gates ran, and
-   anything skipped (including whether companion knowledge was used). Then offer
-   `/finalize-feature` — do not commit, push, or open a PR on your own. A loop that
-   pushes unattended turns a wrong brief into a wrong PR.
+   anything skipped (including whether companion knowledge was used).
+   - If `stack.md#qa_mode` is `none`, skip local QA.
+   - Otherwise ask whether `/qa-local` is needed; if yes, run it (fixes that surface
+     there go through the same builder/`fix_agent` path — do not reopen the build
+     cycle unless the user asks).
+   - Then offer `/finalize-feature` — do not commit, push, or open a PR on your own.
+     A loop that pushes unattended turns a wrong brief into a wrong PR.
 
 ## Stop conditions
 
