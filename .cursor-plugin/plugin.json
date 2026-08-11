@@ -16,5 +16,17 @@
     "qa",
     "git",
     "pr"
+  ],
+  "skills": [
+    "./skills/setup-project-skills",
+    "./skills/start-issue",
+    "./skills/verify-feature",
+    "./skills/qa-local",
+    "./skills/loop",
+    "./skills/finalize-feature"
+  ],
+  "agents": [
+    "./agents/builder.md",
+    "./agents/checker.md"
   ]
 }

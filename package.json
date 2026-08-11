@@ -1,0 +1,17 @@
+{
+  "name": "delivery-skills",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Config-driven delivery workflow skills that adapt to any repo via docs/agents/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TomWebwalker/skills"
+  },
+  "license": "MIT",
+  "scripts": {
+    "sync-plugin-version": "node scripts/sync-plugin-version.mjs",
+    "check-plugin-version": "node scripts/sync-plugin-version.mjs --check",
+    "check-plugin-layout": "node scripts/validate-plugin-layout.mjs",
+    "validate-plugin": "npm run check-plugin-version && npm run check-plugin-layout && claude plugin validate . --strict"
+  }
+}

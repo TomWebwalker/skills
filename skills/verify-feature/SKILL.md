@@ -3,6 +3,8 @@ name: verify-feature
 description: Run this repo's quality gates (tests, types, lint, build, duplication) and report exactly what failed, without changing any code. Reads per-repo config from docs/agents/ (stack, quality gates), so it works in any language. Use after implementing a change, before finalizing it for review, or as the check half of /loop.
 ---
 
+Model-invoked on purpose — `/loop`'s checker and other skills must be able to reach for this.
+
 **Load config first.** Read `docs/agents/stack.md` and `docs/agents/quality-gates.md`.
 If either is missing, suggest `/setup-project-skills`. Every command below comes from
 those files — do not hardcode a package manager, a test runner, or a source path.

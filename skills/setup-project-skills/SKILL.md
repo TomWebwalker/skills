@@ -1,6 +1,7 @@
 ---
 name: setup-project-skills
-description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Use when onboarding these skills to a new repo, or when their assumptions don't match the project.
+description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Run once per repo before the other delivery skills.
+disable-model-invocation: true
 ---
 
 This skill writes per-repo configuration that the generic workflow skills read at

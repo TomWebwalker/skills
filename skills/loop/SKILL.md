@@ -1,7 +1,8 @@
 ---
 name: loop
-description: Run a build-then-verify loop until the repo's quality gates pass. Dispatches a builder to implement the task and a checker to run the gates, feeding failures back until green or the cycle budget runs out. Reads per-repo config from docs/agents/, so it works in any language. Use to drive a task to done hands-off.
+description: Run a build-then-verify loop until the repo's quality gates pass. Dispatches a builder to implement the task and a checker to run the gates, feeding failures back until green or the cycle budget runs out. Reads per-repo config from docs/agents/, so it works in any language.
 argument-hint: <task>
+disable-model-invocation: true
 ---
 
 Run this task as a loop: `$ARGUMENTS`

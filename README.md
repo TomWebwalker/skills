@@ -22,6 +22,15 @@ browser UI, an HTTP API or a CLI; full-stack or a split UI/API with a companion 
 
 ## Quickstart
 
+Two ways in, two philosophies. **Pick one** — installing both leaves every skill
+twice (bare `/loop` from skills.sh and namespaced `/delivery-skills:loop` from the
+plugin), and updates will diverge.
+
+- **Plugin** — subscribe to a managed bundle (skills + `builder` / `checker` agents).
+  Updates when you bump the plugin version.
+- **skills.sh** — copy editable skill files you own. Pull updates with
+  `npx skills update` when you choose.
+
 ### Option A — install as a plugin (recommended for teams)
 
 Skills **and** the `builder` / `checker` agents ship together. Invocations are
@@ -201,12 +210,19 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 Six skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
 Install path for each skill is `skills/<name>/`; agents are single markdown files.
 Plugin manifests: [`.claude-plugin/`](./.claude-plugin/) (Claude Code) and
-[`.cursor-plugin/`](./.cursor-plugin/) (Cursor). Both discover the same `skills/` and
-`agents/` trees.
+[`.cursor-plugin/`](./.cursor-plugin/) (Cursor) list those paths explicitly.
+
+**Invocation.** Orchestrators
+(`setup-project-skills`, `start-issue`, `loop`, `qa-local`, `finalize-feature`) set
+`disable-model-invocation: true` — they run only when you type them.
+`verify-feature` stays model-invoked so `/loop`'s checker can reach for it.
+
+Version lives in [`package.json`](./package.json); bump it, run
+`npm run sync-plugin-version`, and note the change in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ### Setup
 
-Run once per repo.
+Run once per repo. **User-invoked.**
 
 | Skill | What it does |
 |---|---|
@@ -216,18 +232,18 @@ Run once per repo.
 
 Daily delivery. Each skill loads only the config files it needs and degrades when they are missing.
 
-| Skill | What it does |
-|---|---|
-| **[start-issue](./skills/start-issue/SKILL.md)** | Update the base branch, create a feature branch for a ticket, set the ticket in progress. |
-| **[verify-feature](./skills/verify-feature/SKILL.md)** | Run every configured quality gate and report exactly what failed. Never edits code. |
-| **[qa-local](./skills/qa-local/SKILL.md)** | Guide local QA — browser, API, or CLI — fixing issues as they surface. Mode comes from `stack.md#qa_mode`. |
-| **[finalize-feature](./skills/finalize-feature/SKILL.md)** | Commit, rebase on the base branch, verify, push, open a PR, write QA notes on the ticket. |
+| Skill | Invocation | What it does |
+|---|---|---|
+| **[start-issue](./skills/start-issue/SKILL.md)** | User | Update the base branch, create a feature branch for a ticket, set the ticket in progress. |
+| **[verify-feature](./skills/verify-feature/SKILL.md)** | Model or user | Run every configured quality gate and report exactly what failed. Never edits code. |
+| **[qa-local](./skills/qa-local/SKILL.md)** | User | Guide local QA — browser, API, or CLI — fixing issues as they surface. Mode comes from `stack.md#qa_mode`. |
+| **[finalize-feature](./skills/finalize-feature/SKILL.md)** | User | Commit, rebase on the base branch, verify, push, open a PR, write QA notes on the ticket. |
 
 ### Automation
 
-| Skill | What it does |
-|---|---|
-| **[loop](./skills/loop/SKILL.md)** | Build → verify until green (or the cycle budget / stop conditions). Optionally pulls companion knowledge from `topology.md`. On green: ask for `/qa-local` (skip when `qa_mode` is `none`), then offer `/finalize-feature` — never push unattended. |
+| Skill | Invocation | What it does |
+|---|---|---|
+| **[loop](./skills/loop/SKILL.md)** | User | Build → verify until green (or the cycle budget / stop conditions). Optionally pulls companion knowledge from `topology.md`. On green: ask for `/qa-local` (skip when `qa_mode` is `none`), then offer `/finalize-feature` — never push unattended. |
 
 Typical happy path:
 

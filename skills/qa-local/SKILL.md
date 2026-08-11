@@ -1,6 +1,7 @@
 ---
 name: qa-local
-description: Guide a developer through a ticket's QA steps locally — in the browser, against an API, or via a CLI — fixing issues as they surface. Reads per-repo config from docs/agents/ (issue tracker, stack), so it works for frontend, backend, and CLI projects alike. Use for local QA before sending a change for review.
+description: Guide a developer through a ticket's QA steps locally — in the browser, against an API, or via a CLI — fixing issues as they surface. Reads per-repo config from docs/agents/ (issue tracker, stack), so it works for frontend, backend, and CLI projects alike.
+disable-model-invocation: true
 ---
 
 **Load config first.** Read `docs/agents/issue-tracker.md` and `docs/agents/stack.md`.
