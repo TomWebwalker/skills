@@ -1,13 +1,13 @@
 ---
 name: setup-project-skills
-description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature) know its issue tracker, branching model, stack, and quality gates. Works for any language or framework. Use when onboarding these skills to a new repo, or when their assumptions don't match the project.
+description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Use when onboarding these skills to a new repo, or when their assumptions don't match the project.
 ---
 
 This skill writes per-repo configuration that the generic workflow skills read at
 runtime. It is **prompt-driven**: detect what you can, show findings, confirm with
 the user, then write the files. Do not silently guess — confirm each axis.
 
-The configuration lives in four files under `docs/agents/` in the **target repo**
+The configuration lives in five files under `docs/agents/` in the **target repo**
 (the current working directory), plus a pointer block in `CLAUDE.md`/`AGENTS.md`.
 Annotated schemas for each file are bundled at `templates/` next to this SKILL.md —
 read them first; they define every key the skills depend on, and each ends with
@@ -51,6 +51,14 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    point (`cmd/`, `bin/`, console-script entry → `cli`), or is it a library with no
    manual QA (`none`)?
 
+   *Topology* — does this repo own both UI and API (`full-stack`), only the UI
+   (`frontend`), only the API/service (`backend`), or neither (`standalone` for a
+   CLI/library/infra)? Heuristics: UI framework deps with no server routes →
+   frontend; HTTP framework / OpenAPI with no UI app → backend; both present in
+   one tree → full-stack; binary/`cmd/`/library layout → standalone. Look for
+   sibling checkouts next to this repo (`../…-backend`, `../…-frontend`,
+   `../…-api`, `../…-ui`) and README links to a companion remote.
+
    *Services* — `docker-compose.y*ml`, `compose.y*ml`, dev container config, or a
    `Makefile` target that starts dependencies.
 
@@ -71,10 +79,21 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
 2. **Confirm.** Present what you detected per axis and ask the user to correct
    anything. Resolve at minimum: tracker type + id pattern + status names; base
    branch + branch pattern + PR target; language + layout + source paths + qa mode +
-   the command map; commit convention + which gates CI enforces. Say explicitly which
-   values you are leaving empty and why.
+   the command map; **topology role** (full-stack / frontend / backend / standalone)
+   and, when the role is frontend or backend, the companion path and/or URL; commit
+   convention + which gates CI enforces. Say explicitly which values you are leaving
+   empty and why.
 
-3. **Write `docs/agents/`.** Create the four files from the bundled `templates/`,
+   For topology, ask explicitly — do not infer this alone from `qa_mode`:
+
+   - Is this a **full-stack** repo (UI and API in one tree)?
+   - Or a **frontend** repo? If yes: where is the backend/API repo (local path and,
+     optionally, remote URL)?
+   - Or a **backend** repo? If yes: where is the frontend/UI repo (local path and,
+     optionally, remote URL)?
+   - Or **standalone** (CLI, library, infra — no UI/API sibling)?
+
+3. **Write `docs/agents/`.** Create the five files from the bundled `templates/`,
    substituting confirmed values into the frontmatter and rewriting the prose body to
    describe *this* repo. Delete the "Worked examples" and "Adapting" sections — they
    belong to the template, not to the generated config:
@@ -82,6 +101,7 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - `docs/agents/vcs.md`
    - `docs/agents/stack.md`
    - `docs/agents/quality-gates.md`
+   - `docs/agents/topology.md`
 
 4. **Write the pointer block.** Add (or update) an `## Agent skills` section in
    `CLAUDE.md` (or `AGENTS.md` if that's what the repo uses):
@@ -94,6 +114,7 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - `vcs.md` — base branch, branch naming, PR target
    - `stack.md` — language, commands, QA mode, fix agent
    - `quality-gates.md` — commit rules, pre-push checks, and /loop settings
+   - `topology.md` — full-stack vs split UI/API, and where the companion repo lives
 
    To re-run setup: `/setup-project-skills`.
    ```
@@ -101,11 +122,13 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
 5. **Verify.** Before reporting, dry-run the cheapest configured command (e.g.
    `commands.lint` or `--version` on the toolchain) to confirm the command map is
    real, not aspirational. Report anything that failed instead of leaving it to be
-   discovered mid-workflow.
+   discovered mid-workflow. If `topology.md` names a companion `path`, check that it
+   exists on disk; if missing, note that `/loop` will fall back to `url`.
 
-6. **Report.** Summarize the four files, note which steps the workflow skills will
+6. **Report.** Summarize the five files, note which steps the workflow skills will
    skip given the config (no tracker → no ticket steps; `qa_mode: none` → no manual
-   QA; empty `dev` → qa-local can't serve the app). If `/loop` will be used, say
+   QA; empty `dev` → qa-local can't serve the app; `topology.role` full-stack or
+   standalone → `/loop` skips companion knowledge). If `/loop` will be used, say
    whether the configured builder/checker subagents are actually installed — if not,
    it runs both roles inline, which works but shares this conversation's context.
 

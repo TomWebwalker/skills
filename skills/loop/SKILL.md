@@ -6,10 +6,12 @@ argument-hint: <task>
 
 Run this task as a loop: `$ARGUMENTS`
 
-**Load config first.** Read `docs/agents/vcs.md`, `docs/agents/stack.md`, and
-`docs/agents/quality-gates.md`. If they're missing, suggest `/setup-project-skills`
-and fall back to `loop.max_cycles: 5`. Every command, branch name, and stop condition
-below comes from config — nothing about this loop is repo-specific.
+**Load config first.** Read `docs/agents/vcs.md`, `docs/agents/stack.md`,
+`docs/agents/quality-gates.md`, and `docs/agents/topology.md` (if present). If the
+first three are missing, suggest `/setup-project-skills` and fall back to
+`loop.max_cycles: 5`. Every command, branch name, and stop condition below comes
+from config — nothing about this loop is repo-specific. Missing `topology.md`
+means treat the repo as self-contained (same as `role: standalone`).
 
 **Roles.** The loop dispatches two subagents, named in `quality-gates.md#loop`:
 
@@ -33,18 +35,34 @@ it knows the framework.
    definition of done is "every gate in `quality-gates.md#gates` passes" plus whatever
    the task itself requires. Show the brief before starting — a wrong brief burns
    every cycle after it.
-3. **Build.** Dispatch the builder with the brief. On later cycles, dispatch it with
-   the checker's failure report instead, unchanged.
-4. **Check.** Dispatch the checker. It runs `/verify-feature` and returns either
+3. **Companion knowledge (optional).** Read `topology.md#role`.
+   - If `full-stack` or `standalone`, or `topology.md` is missing → **skip** this
+     step entirely. Say nothing about companions.
+   - If `frontend` or `backend` → decide whether *this* task needs knowledge from the
+     other half (API contracts, OpenAPI/DTO shapes, auth, screen flows, copy, feature
+     flags owned elsewhere). If the brief is fully answerable inside this repo, skip.
+   - When needed: open the companion at `companion.path` if it exists on disk;
+     otherwise use `companion.url` (clone or browse) and say which you used. Pull
+     only what the brief requires into a short "companion notes" addendum on the
+     brief. Do **not** edit the companion repo unless the user asked to.
+   - `frontend` → companion is the API (`kind: api`). `backend` → companion is the
+     UI (`kind: ui`). If `path` and `url` are both empty, ask once for the location,
+     then continue.
+4. **Build.** Dispatch the builder with the brief (plus companion notes, if any). On
+   later cycles, dispatch it with the checker's failure report instead, unchanged —
+   do not re-fetch companion knowledge unless the failure shows the prior notes were
+   wrong or incomplete.
+5. **Check.** Dispatch the checker. It runs `/verify-feature` and returns either
    `ALL GREEN` or `FAILED` with one line per cause.
-5. **Branch on the result.**
-   - `ALL GREEN` → go to step 7.
-   - `FAILED` → go back to step 3 with the failures.
-6. **Count out loud.** Announce the cycle number before each build ("cycle 2 of 5").
+6. **Branch on the result.**
+   - `ALL GREEN` → go to step 8.
+   - `FAILED` → go back to step 4 with the failures.
+7. **Count out loud.** Announce the cycle number before each build ("cycle 2 of 5").
    Stop at `loop.max_cycles`.
-7. **Finish.** On green, stop and show the result: what changed, which gates ran, and
-   anything skipped. Then offer `/finalize-feature` — do not commit, push, or open a
-   PR on your own. A loop that pushes unattended turns a wrong brief into a wrong PR.
+8. **Finish.** On green, stop and show the result: what changed, which gates ran, and
+   anything skipped (including whether companion knowledge was used). Then offer
+   `/finalize-feature` — do not commit, push, or open a PR on your own. A loop that
+   pushes unattended turns a wrong brief into a wrong PR.
 
 ## Stop conditions
 

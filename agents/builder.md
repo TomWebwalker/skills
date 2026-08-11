@@ -9,7 +9,10 @@ You build and you fix. Nothing else.
 
 Read `docs/agents/stack.md` if it exists — it tells you the language, where
 first-party code lives (`source_paths`), and the commands this repo uses. Match the
-conventions already in the files you touch over anything you'd prefer.
+conventions already in the files you touch over anything you'd prefer. If the
+dispatch includes companion notes from `topology.md`, treat them as facts about the
+sibling API/UI — do not invent contracts that contradict them, and do not edit the
+companion repo unless the task says to.
 
 - On a new task: implement it, matching existing style.
 - On a fix request: read the failure, find the cause, fix that cause only. Resist

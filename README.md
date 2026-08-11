@@ -12,9 +12,10 @@ written for. Copy it elsewhere and it lies about your tooling.
 
 These skills separate the *process* (universal) from the *parameters* (per-repo). The
 skill carries the steps; each repository supplies its own tooling knowledge through
-four small config files. Onboard a repo once, and `/start-issue`, `/qa-local`, `/loop` and
-`/finalize-feature` adapt to it—Linear, GitHub Issues, Jira or nothing; `develop` or
-`main`; npm, uv, cargo, go or maven; a browser UI, an HTTP API or a CLI.
+small config files under `docs/agents/`. Onboard a repo once, and `/start-issue`,
+`/qa-local`, `/loop` and `/finalize-feature` adapt to it—Linear, GitHub Issues, Jira
+or nothing; `develop` or `main`; npm, uv, cargo, go or maven; a browser UI, an HTTP
+API or a CLI; full-stack or a split UI/API with a companion repo.
 
 **Nothing here assumes a language or a frontend.** The only hard requirements are
 `git` and an agent that can run shell commands.
@@ -50,6 +51,8 @@ four small config files. Onboard a repo once, and `/start-issue`, `/qa-local`, `
    - Detect and confirm your **issue tracker** (Linear, GitHub, Jira, GitLab, or none)
    - Detect and confirm your **branching model** (base branch, branch naming, PR target)
    - Detect and confirm your **stack** (language, package manager, commands, QA mode)
+   - Detect and confirm your **topology** (full-stack, frontend, backend, or standalone —
+     and where the companion API/UI repo lives when the stack is split)
    - Detect and confirm your **quality gates** (commit rules, pre-push checks)
 
    It reads whichever manifest your repo actually has—`package.json`, `pyproject.toml`,
@@ -80,7 +83,7 @@ parameters into the process is what makes a skill non-portable.
 
 ### The seam: process is universal, parameters are per-repo
 
-`setup-project-skills` writes four config files into the target repo under
+`setup-project-skills` writes config files into the target repo under
 `docs/agents/`, plus a pointer block in `CLAUDE.md`/`AGENTS.md`. The other skills
 *read* that config at runtime instead of assuming anything.
 
@@ -91,7 +94,8 @@ skills/                                    each onboarded repo/
   verify-feature/         ──reads───>          vcs.md             # base branch, branch naming, PR target
   qa-local/               ──reads───>          stack.md           # language, commands, QA mode
   finalize-feature/       ──reads───>          quality-gates.md   # commit rules, gates, loop settings
-  loop/                   ──reads───>        CLAUDE.md  (## Agent skills pointer block)
+  loop/                   ──reads───>          topology.md        # full-stack vs companion UI/API
+                                         CLAUDE.md  (## Agent skills pointer block)
 ```
 
 Knowledge that can't be inferred—how to validate a full commit message against your
@@ -129,6 +133,10 @@ be to weaken a check. On success it stops and *offers* `/finalize-feature` rathe
 pushing — an unattended loop that opens PRs just turns a wrong brief into a wrong PR
 faster.
 
+When `topology.md` says the repo is a split **frontend** or **backend**, `/loop`
+optionally reads the companion API or UI repo before building — only if the task needs
+that knowledge. Full-stack and standalone repos skip that step.
+
 ### Graceful when a repo isn't onboarded
 
 Every skill opens by loading its config and naming a fallback. Run a skill in a repo
@@ -153,7 +161,7 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 
 Run once per repo.
 
-- **[setup-project-skills](./skills/setup-project-skills/SKILL.md)** — Detect, confirm, and write the repo's `docs/agents/` config (issue tracker, vcs, stack, quality gates) so the workflow skills adapt to it.
+- **[setup-project-skills](./skills/setup-project-skills/SKILL.md)** — Detect, confirm, and write the repo's `docs/agents/` config (issue tracker, vcs, stack, quality gates, topology) so the workflow skills adapt to it.
 
 ### Workflow
 
@@ -166,7 +174,7 @@ Config-driven, daily-use delivery skills.
 
 ### Automation
 
-- **[loop](./skills/loop/SKILL.md)** — Build, verify, repeat until the gates pass. Dispatches [`builder`](./agents/builder.md) to write code and [`checker`](./agents/checker.md) to run `/verify-feature`, feeding failures back until green or the cycle budget runs out.
+- **[loop](./skills/loop/SKILL.md)** — Build, verify, repeat until the gates pass. Dispatches [`builder`](./agents/builder.md) to write code and [`checker`](./agents/checker.md) to run `/verify-feature`, feeding failures back until green or the cycle budget runs out. For split stacks, optionally consults `topology.md`'s companion repo before building.
 
 ## Adding a new skill
 
