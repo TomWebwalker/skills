@@ -8,6 +8,7 @@
   "homepage": "https://github.com/TomWebwalker/skills",
   "repository": "https://github.com/TomWebwalker/skills",
   "license": "MIT",
+  "logo": "./assets/logo.svg",
   "keywords": [
     "skills",
     "workflow",
