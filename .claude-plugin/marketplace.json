@@ -1,0 +1,35 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "tomwebwalker-skills",
+  "description": "Portable, config-driven delivery skills that adapt to any repo via docs/agents/.",
+  "owner": {
+    "name": "Tomasz Flis",
+    "url": "https://github.com/TomWebwalker"
+  },
+  "plugins": [
+    {
+      "name": "delivery-skills",
+      "source": "./",
+      "description": "Config-driven start-issue / verify-feature / qa-local / loop / finalize-feature workflows with builder and checker agents.",
+      "author": {
+        "name": "Tomasz Flis"
+      },
+      "homepage": "https://github.com/TomWebwalker/skills",
+      "repository": "https://github.com/TomWebwalker/skills",
+      "license": "MIT",
+      "category": "development",
+      "tags": [
+        "workflow",
+        "delivery",
+        "skills"
+      ],
+      "keywords": [
+        "skills",
+        "workflow",
+        "delivery",
+        "loop",
+        "qa"
+      ]
+    }
+  ]
+}

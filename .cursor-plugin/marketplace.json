@@ -1,0 +1,31 @@
+{
+  "name": "tomwebwalker-skills",
+  "owner": {
+    "name": "Tomasz Flis"
+  },
+  "metadata": {
+    "description": "Portable, config-driven delivery skills that adapt to any repo via docs/agents/."
+  },
+  "plugins": [
+    {
+      "name": "delivery-skills",
+      "source": ".",
+      "description": "Config-driven start-issue / verify-feature / qa-local / loop / finalize-feature workflows with builder and checker agents.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Tomasz Flis"
+      },
+      "homepage": "https://github.com/TomWebwalker/skills",
+      "repository": "https://github.com/TomWebwalker/skills",
+      "license": "MIT",
+      "keywords": [
+        "skills",
+        "workflow",
+        "delivery",
+        "loop",
+        "qa"
+      ],
+      "category": "developer-tools"
+    }
+  ]
+}

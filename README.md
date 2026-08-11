@@ -22,57 +22,98 @@ browser UI, an HTTP API or a CLI; full-stack or a split UI/API with a companion 
 
 ## Quickstart
 
-1. Install the skills into your agent with the [`skills`](https://github.com/vercel-labs/skills) CLI:
+### Option A — install as a plugin (recommended for teams)
 
-   ```bash
-   npx skills@latest add TomWebwalker/skills
-   ```
+Skills **and** the `builder` / `checker` agents ship together. Invocations are
+namespaced as `/delivery-skills:<skill>` (for example `/delivery-skills:loop`).
 
-   Select the skills and agent you want when prompted (or add `-g -y` for a
-   non-interactive install). Use `--list` to preview, or `--skill <name>` to pick
-   specific ones. Re-run the command later to pull updates.
+**Claude Code** — add the marketplace, then install:
 
-   <details>
-   <summary>Prefer to manage them yourself? Symlink instead.</summary>
+```bash
+claude plugin marketplace add TomWebwalker/skills
+claude plugin install delivery-skills@tomwebwalker-skills
+```
 
-   ```bash
-   git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
-   cd ~/projects/claude-skills
-   for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop; do
-     ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
-   done
-   ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
-   ln -sfn "$PWD/agents/checker.md" ~/.claude/agents/checker.md
-   ```
+Or commit this into a product repo's `.claude/settings.json` so teammates get prompted:
 
-   </details>
+```json
+{
+  "extraKnownMarketplaces": {
+    "tomwebwalker-skills": {
+      "source": { "source": "github", "repo": "TomWebwalker/skills" }
+    }
+  },
+  "enabledPlugins": {
+    "delivery-skills@tomwebwalker-skills": true
+  }
+}
+```
 
-2. In any repo you want to onboard, run **`/setup-project-skills`**. It will:
-   - Detect and confirm your **issue tracker** (Linear, GitHub, Jira, GitLab, or none)
-   - Detect and confirm your **branching model** (base branch, branch naming, PR target)
-   - Detect and confirm your **stack** (language, package manager, commands, QA mode)
-   - Detect and confirm your **topology** (full-stack, frontend, backend, or standalone —
-     and where the companion API/UI repo lives when the stack is split)
-   - Detect and confirm your **quality gates** (commit rules, pre-push checks)
+Local smoke-test without installing:
 
-   It reads whichever manifest your repo actually has—`package.json`, `pyproject.toml`,
-   `go.mod`, `Cargo.toml`, `pom.xml`, `Gemfile`, `Makefile`—and takes gates from your
-   CI config so local checks mirror what CI enforces.
+```bash
+claude --plugin-dir /path/to/skills
+```
 
-3. **Optional — install the subagents for `/loop`.** `npx skills` installs skills, not
-   subagents, so copy the two bundled roles in yourself:
+**Cursor** — import the GitHub repo as a Team Marketplace (Dashboard → Plugins), or
+submit [`.cursor-plugin/`](./.cursor-plugin/) via
+[cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). The
+manifests live beside the Claude ones; `skills/` and `agents/` are shared.
 
-   ```bash
-   mkdir -p ~/.claude/agents
-   curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/builder.md -o ~/.claude/agents/builder.md
-   curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/checker.md -o ~/.claude/agents/checker.md
-   ```
+### Option B — install individual skills with skills.sh
 
-   Skip it if you like — `/loop` runs both roles inline when the subagents are absent.
-   Separate agents are better, though: the builder never sees the full gate output and
-   the checker never sees the diff rationale, which is most of why the split works.
+```bash
+npx skills@latest add TomWebwalker/skills
+```
 
-4. Ready to begin. Every skill now reads that config.
+Select the skills you want when prompted (or add `-g -y` for a non-interactive
+install). Use `--list` to preview, or `--skill <name>` to pick specific ones.
+Re-run later to pull updates.
+
+<details>
+<summary>Prefer to manage them yourself? Symlink instead.</summary>
+
+```bash
+git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
+cd ~/projects/claude-skills
+for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop; do
+  ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
+done
+ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
+ln -sfn "$PWD/agents/checker.md" ~/.claude/agents/checker.md
+```
+
+</details>
+
+`npx skills` installs skills, not subagents. If you use this path, copy the loop
+roles yourself (the plugin path already includes them):
+
+```bash
+mkdir -p ~/.claude/agents
+curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/builder.md -o ~/.claude/agents/builder.md
+curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/checker.md -o ~/.claude/agents/checker.md
+```
+
+Skip the agents if you like — `/loop` runs both roles inline when they are absent.
+Separate agents are better: the builder never sees the full gate output and the
+checker never sees the diff rationale.
+
+### Onboard a repo
+
+In any repo you want to use these skills, run **`/setup-project-skills`** (or
+`/delivery-skills:setup-project-skills` from the plugin). It will:
+
+- Detect and confirm your **issue tracker** (Linear, GitHub, Jira, GitLab, or none)
+- Detect and confirm your **branching model** (base branch, branch naming, PR target)
+- Detect and confirm your **stack** (language, package manager, commands, QA mode)
+- Detect and confirm your **topology** (full-stack, frontend, backend, or standalone —
+  and where the companion API/UI repo lives when the stack is split)
+- Detect and confirm your **quality gates** (commit rules, pre-push checks)
+
+It reads whichever manifest your repo actually has—`package.json`, `pyproject.toml`,
+`go.mod`, `Cargo.toml`, `pom.xml`, `Gemfile`, `Makefile`—and takes gates from your
+CI config so local checks mirror what CI enforces. After that, every skill reads
+that config.
 
 ## Why These Skills Exist
 
@@ -159,6 +200,9 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 
 Six skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
 Install path for each skill is `skills/<name>/`; agents are single markdown files.
+Plugin manifests: [`.claude-plugin/`](./.claude-plugin/) (Claude Code) and
+[`.cursor-plugin/`](./.cursor-plugin/) (Cursor). Both discover the same `skills/` and
+`agents/` trees.
 
 ### Setup
 
