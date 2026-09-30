@@ -35,6 +35,25 @@ findings in the reviewer's format). Say once, up front, that you're running inli
 bundled agents. If `stack.md#fix_agent` is set, prefer it over the generic builder —
 it knows the framework.
 
+## Decision log
+
+Keep an append-only TSV of the loop's decisions, so a reviewer (and
+`/finalize-feature`) can see *why* the branch looks the way it does. Path:
+
+```bash
+repo=$(basename "$(git rev-parse --show-toplevel)")
+branch=$(git branch --show-current | tr '/' '-')
+log="${TMPDIR:-/tmp}/delivery-skills/$repo/$branch/loop-decisions.tsv"
+mkdir -p "$(dirname "$log")"
+[ -f "$log" ] || printf 'ts\tcycle\tdecision\twhy\tevidence\tresult\n' > "$log"
+```
+
+A re-run on the same branch appends. Add one row per decision, not per tool
+call: each grill answer, skipping or using companion knowledge, each build dispatch
+(what was asked), each check and review outcome, a disputed finding, and any stop
+condition. `ts` is ISO-8601, `cycle` is `0` for the brief, `evidence` is a checker
+line, finding, or file path. Replace tabs and newlines inside values with spaces.
+
 ## Steps
 
 1. **Branch.** Check the current branch against `vcs.md#branch_pattern`. If it already
@@ -109,7 +128,7 @@ it knows the framework.
    Stop at `loop.max_cycles`.
 9. **Finish.** On green and clean review, stop and show the result: what changed,
    which gates ran, the review result per axis, and anything skipped (including
-   whether companion knowledge was used).
+   whether companion knowledge was used), and the decision log path.
    - If `stack.md#qa_mode` is `none`, skip local QA.
    - Otherwise ask whether `/qa-local` is needed; if yes, run it (fixes that surface
      there go through the same builder/`fix_agent` path — do not reopen the build

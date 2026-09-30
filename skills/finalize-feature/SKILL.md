@@ -34,7 +34,25 @@ implement a part, look for examples in the repo or ask.
 6. Open a PR targeting **`vcs.md#pr_target`** with `vcs.md#pr_tool` (`gh pr create`,
    `glab mr create`, or — for `manual` — push and print the compare URL). Use
    `vcs.md#pr_template` for the body if one is configured; otherwise summarize the
-   change, the reasoning, and how to verify it.
+   change, the reasoning, and how to verify it. Either way, write it so the reviewer
+   can understand the change without opening every file:
+   - **Show the shape.** Add the *one* smallest view that explains the change, and
+     only when the diff needs one:
+     - *call tree* — a change threaded through a call path (a new parameter passed
+       down from handler to query);
+     - *component tree* — UI changes spread across nested components;
+     - *diff-shaped file tree* — many files, a few ideas: group files by idea, mark
+       each `+` / `~` / `-`, add one phrase of why;
+     - *Mermaid* — a new state machine or request flow, at most ~10 nodes;
+     - *nothing* — a one-file change needs a sentence, not a diagram.
+   - **Link the evidence.** If `/verify-feature` printed an `evidence:` path from app
+     verification, summarize its `index.md` (what was driven, which hostile inputs,
+     the result) under a *Verification* heading. Screenshots can't be uploaded from
+     the CLI — name the files and offer to attach them by hand.
+   - **Summarize the decisions.** If `/loop` left a decision log for this branch (path
+     in `/loop`'s *Decision log* section), add a collapsed *Decisions* section: the
+     rows as a table when there are 15 or fewer, otherwise the grill answers,
+     disputed findings, and stop conditions. Drop routine build/check rows.
 7. If tracker is not `none`, find the ticket from the branch name via
    `issue-tracker.md#ticket_id_pattern`.
 8. Write a QA-instructions comment on the ticket (per `issue-tracker.md`), and set it to
