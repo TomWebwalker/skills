@@ -22,6 +22,7 @@ loop:
   max_cycles: 5
   builder_agent: builder
   checker_agent: checker
+  reviewer_agent: reviewer
   on_exhausted: stop-and-report
 ---
 

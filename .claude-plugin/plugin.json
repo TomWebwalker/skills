@@ -28,6 +28,7 @@
   ],
   "agents": [
     "./agents/builder.md",
-    "./agents/checker.md"
+    "./agents/checker.md",
+    "./agents/reviewer.md"
   ]
 }

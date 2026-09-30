@@ -26,6 +26,7 @@ loop:                         # settings for /loop (build → verify → repeat)
   max_cycles: 5               # cycle budget before the loop hands back to a human
   builder_agent: builder      # subagent that writes/fixes code ('' = run inline)
   checker_agent: checker      # subagent that runs verify-feature ('' = run inline)
+  reviewer_agent: reviewer    # subagent that reviews the green diff ('' = skip review)
   on_exhausted: stop-and-report   # stop-and-report | ask
 ---
 
@@ -94,6 +95,11 @@ its own when it isn't converging (see the skill for the full list).
 Leave `builder_agent`/`checker_agent` at their defaults unless this repo has better
 ones. Set them to `''` to run both roles inline without subagents. If
 `stack.md#fix_agent` is set, `/loop` prefers it over the generic builder.
+
+After the checker reports green, `/loop` dispatches `reviewer_agent` twice in
+parallel: once against `standards.md`, once against the ticket's spec. Findings go
+back to the builder as a normal cycle. Set `reviewer_agent: ''` to skip review — the
+loop then ends at green, as before.
 
 ## Worked examples
 
