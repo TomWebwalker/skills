@@ -23,7 +23,8 @@
     "./skills/verify-feature",
     "./skills/qa-local",
     "./skills/loop",
-    "./skills/finalize-feature"
+    "./skills/finalize-feature",
+    "./skills/retro"
   ],
   "agents": [
     "./agents/builder.md",

@@ -3,8 +3,10 @@
 // - Every skills/agents path in both plugin manifests exists
 // - Orchestrators declare disable-model-invocation: true
 // - verify-feature does not
+// - Every skills/<name>/ and agents/*.md on disk is listed in both manifests,
+//   and every skill is in exactly one invocation list
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,6 +18,7 @@ const USER_INVOKED = [
   "loop",
   "qa-local",
   "finalize-feature",
+  "retro",
 ];
 const MODEL_INVOKED = ["verify-feature"];
 
@@ -23,6 +26,13 @@ const manifests = [
   join(repo, ".claude-plugin", "plugin.json"),
   join(repo, ".cursor-plugin", "plugin.json"),
 ];
+
+const skillsOnDisk = readdirSync(join(repo, "skills"), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name);
+const agentsOnDisk = readdirSync(join(repo, "agents")).filter((f) =>
+  f.endsWith(".md"),
+);
 
 let failed = false;
 
@@ -48,6 +58,25 @@ for (const manifestPath of manifests) {
     if (!existsSync(abs)) {
       fail(`${label}: missing ${agentPath}`);
     }
+  }
+
+  for (const name of skillsOnDisk) {
+    if (!(plugin.skills ?? []).includes(`./skills/${name}`)) {
+      fail(`${label}: skills/${name} exists but is not listed in "skills"`);
+    }
+  }
+
+  for (const file of agentsOnDisk) {
+    if (!(plugin.agents ?? []).includes(`./agents/${file}`)) {
+      fail(`${label}: agents/${file} exists but is not listed in "agents"`);
+    }
+  }
+}
+
+for (const name of skillsOnDisk) {
+  const lists = [USER_INVOKED, MODEL_INVOKED].filter((l) => l.includes(name));
+  if (lists.length !== 1) {
+    fail(`${name}: must be in exactly one of USER_INVOKED / MODEL_INVOKED`);
   }
 }
 
