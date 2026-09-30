@@ -186,8 +186,11 @@ story. A backend repo gets backend QA, not "open localhost in Chrome".
 /loop add rate limiting to the token refresh endpoint
 ```
 
-It branches (or stays put if you're already on a feature branch), writes a one-line
-brief, then alternates **builder** → **checker** until `/verify-feature` returns
+It branches (or stays put if you're already on a feature branch), then writes the
+brief. It looks up the facts itself and restates the goal and the problem in its own
+words. Then it asks one round of numbered questions, each with a recommended answer.
+Only decisions reach you, never facts it could find in the repo. Pass `--no-grill` to
+skip the questions. Then it alternates **builder** → **checker** until `/verify-feature` returns
 `ALL GREEN`. The two roles are deliberately separated: the builder writes code and
 never runs the gates, the checker runs the gates and never writes code. A single agent
 doing both drifts toward declaring itself done.
@@ -315,6 +318,13 @@ Optional subagents. `/loop` runs the same roles inline when these files are not 
 4. Handle the empty case: an unset command means skip the step and say so, not guess.
 5. Symlink it into `~/.claude/skills/`.
 
+## Works well with
+
+Generic helpers that don't need `docs/agents/`, so they aren't duplicated here:
+
+- [mattpocock/skills](https://github.com/mattpocock/skills) `/grill-me` — a longer
+  grilling session on a plan before you hand it to `/loop`.
+
 ## Inspired by
 
 Ideas below were reimplemented in our own words and fitted to the `docs/agents/`
@@ -326,6 +336,8 @@ config model; no text was copied.
 - **App verification** (`/setup-project-skills` → `verify-<app>`) — pstack's
   `create-verification-skill` by Lauren Tan, and Emil Kowalski's
   ([emilkowalski/skills](https://github.com/emilkowalski/skills)) break-it testing.
+- **Restate-and-grill brief** (`/loop` step 2) — Lauren Tan's restate prompt, and
+  Matt Pocock's `grilling` skill.
 - **reviewer + standards.md** — Matt Pocock's `/code-review`, and his point that the
   implementer shouldn't see the standards it will be reviewed against.
 

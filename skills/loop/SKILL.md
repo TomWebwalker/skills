@@ -1,11 +1,14 @@
 ---
 name: loop
 description: Run a build-then-verify loop until the repo's quality gates pass. Dispatches a builder to implement the task and a checker to run the gates, feeding failures back until green or the cycle budget runs out. Reads per-repo config from docs/agents/, so it works in any language.
-argument-hint: <task>
+argument-hint: '[--no-grill] <task>'
 disable-model-invocation: true
 ---
 
 Run this task as a loop: `$ARGUMENTS`
+
+If the arguments contain `--no-grill`, remove it from the task text and remember it
+for step 2.
 
 **Load config first.** Read `docs/agents/vcs.md`, `docs/agents/stack.md`,
 `docs/agents/quality-gates.md`, and — if present — `docs/agents/issue-tracker.md`
@@ -37,10 +40,36 @@ it knows the framework.
 1. **Branch.** Check the current branch against `vcs.md#branch_pattern`. If it already
    matches, stay on it and say so. Otherwise run `/start-issue` to create one. Never
    create a second branch mid-loop.
-2. **Brief.** Write a one-line brief: goal, files in scope, definition of done. The
-   definition of done is "every gate in `quality-gates.md#gates` passes" plus whatever
-   the task itself requires. Show the brief before starting — a wrong brief burns
-   every cycle after it.
+2. **Brief: restate, then grill.** A wrong brief burns every cycle after it, so get
+   it right before building.
+   1. **Look up facts yourself.** Read the ticket (per `issue-tracker.md`, id from
+      the branch name or the task), the code the task points at, and the config.
+      Anything the repo can answer — which file, which function, what the current
+      behavior is — you answer. Don't ask the user.
+   2. **Restate** in your own words, not the ticket's:
+      - **Goal** — what is true when this is done.
+      - **Problem** — why it isn't true now.
+      - **Scope** — files or modules you expect to touch, and what's out of scope.
+      - **Done** — every gate in `quality-gates.md#gates` passes, plus what the task
+        itself requires.
+   3. **Grill, one round.** List the *decisions* the facts didn't settle as numbered
+      questions, each with your recommended answer and a one-clause reason:
+
+      ```
+      1. Expired refresh token: log out or retry once? → Recommended: log out —
+         a retry hides a revoked session.
+      2. ...
+      ```
+
+      Ask them all at once, then wait. The user can answer `ok` to take every
+      recommendation, or override by number. No open decisions → say so and skip
+      the questions.
+   4. **Fold the answers in** and show the final brief. That brief is what the
+      builder gets and what the spec reviewer checks against when there's no ticket.
+
+   **Skip the grill** (write the restated brief and go) when the user passed
+   `--no-grill`, or when the ticket already has acceptance criteria and the user
+   confirms they're complete — then those criteria are the definition of done.
 3. **Companion knowledge (optional).** Read `topology.md#role`.
    - If `full-stack` or `standalone`, or `topology.md` is missing → **skip** this
      step entirely. Say nothing about companions.
