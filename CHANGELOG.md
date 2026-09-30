@@ -4,58 +4,64 @@ All notable changes to this skill set are documented here. Version numbers live 
 `package.json` and are synced into `.claude-plugin/plugin.json` and
 `.cursor-plugin/plugin.json` via `npm run sync-plugin-version`.
 
-## Unreleased
+## 1.1.0
 
 ### Added
 
-- `/retro` skill (user-invoked): routes session lessons to the strongest fix — design
-  change > lint rule or test > gate > `docs/agents/` config > skill text — and applies
-  only approved proposals. Inspired by Matt Pocock's `/retro` and Lauren Tan's
-  `/reflect`.
-- `/handoff` skill (user-invoked): writes branch, ticket, cycle count, last
-  checker/reviewer reports, open decisions, and next suggested skills to a markdown
-  file under the OS temp dir, referencing artifacts by path. Inspired by Matt
-  Pocock's `/handoff`.
-- Layout check fails when a `skills/` or `agents/` entry on disk is missing from either
-  manifest, or a skill is in neither (or both) invocation lists.
-- README "Inspired by" section.
+- `/retro` skill (user-invoked): routes each session lesson to the strongest fix —
+  design change > lint rule or test > gate > `docs/agents/` config > skill text — and
+  applies only approved proposals. Inspired by Matt Pocock's `/retro` and Lauren
+  Tan's `/reflect`.
 - App verification: `/setup-project-skills` can generate a project-local
   `verify-<app>` skill (template `templates/verify-app.md`) that starts the app,
   drives changed flows per `qa_mode` (Playwright / `curl` / pseudo-terminal), runs an
   adversarial input pass, and saves evidence. New optional key
   `quality-gates.md#app_verify: { enabled, skill }`; when enabled, `/verify-feature`
-  runs it as the last gate. Inspired by pstack `create-verification-skill` and Emil
-  Kowalski's break-it testing.
-- `reviewer` agent: read-only. After `ALL GREEN`, `/loop` dispatches it twice in
-  parallel, once on the **standards** axis (`docs/agents/standards.md`) and once on
-  the **spec** axis (the ticket). Findings go back to the builder as a normal cycle.
-  New key `loop.reviewer_agent` (`''` = skip). Inspired by Matt Pocock's
-  `/code-review`.
-- `docs/agents/standards.md` template plus example standards for all three example
-  configs. Rules are tagged `judgment` or `mechanical` (candidates for lint).
-
-- New key `loop.models: { builder, checker, reviewer }` in `quality-gates.md`,
-  passed as a model override per dispatch. Defaults: checker `haiku`, builder
-  `sonnet`, reviewer `opus`. Inspired by Emil Kowalski and pstack's models rule.
+  runs it as the last gate. Inspired by pstack's `create-verification-skill` and
+  Emil Kowalski's break-it testing.
+- `reviewer` agent (read-only). After `ALL GREEN`, `/loop` dispatches it twice in
+  parallel: on the **standards** axis (`docs/agents/standards.md`) and on the
+  **spec** axis (the ticket). Findings go back to the builder as a normal cycle. New
+  key `loop.reviewer_agent` (`''` = skip). Inspired by Matt Pocock's `/code-review`.
+- `docs/agents/standards.md` template, plus example standards for all three example
+  configs. Rules are tagged `judgment` or `mechanical` (a candidate for lint).
+- `/loop` decision log: an append-only TSV (`ts, cycle, decision, why, evidence,
+  result`) under the OS temp dir.
+- New key `loop.models: { builder, checker, reviewer }`, passed as a model override
+  per dispatch. Defaults: checker `haiku`, builder `sonnet`, reviewer `opus`.
+  Inspired by Emil Kowalski and pstack's models rule.
+- `/handoff` skill (user-invoked): writes branch, ticket, cycle count, last
+  checker/reviewer reports, open decisions, and next suggested skills to a markdown
+  file under the OS temp dir, referencing artifacts by path. Inspired by Matt
+  Pocock's `/handoff`.
+- Layout check fails when a `skills/` or `agents/` entry on disk is missing from
+  either manifest, or a skill is in neither (or both) invocation lists.
+- README sections: "Inspired by", "Works well with", and "Sharing `docs/agents/` with
+  other skill sets".
 
 ### Changed
 
-- `checker` agent default model is now `haiku`: it runs commands and copies output.
 - `/loop` step 2 brief is now restate-and-grill: the agent looks up facts, restates
   goal and problem in its own words, then asks one round of numbered decision
   questions, each with a recommended answer. Skipped with `--no-grill`, or when the
   ticket's acceptance criteria are confirmed complete. Inspired by Lauren Tan's
   restate prompt and Matt Pocock's `grilling`.
-- README "Works well with" section.
-- `/finalize-feature` PR body adds the one smallest view that explains the change
-  (call tree, component tree, diff-shaped file tree, or a small Mermaid diagram),
-  summarizes app-verify evidence, and summarizes the loop's decision log.
-- `/loop` keeps an append-only TSV decision log
-  (`ts, cycle, decision, why, evidence, result`) under the OS temp dir. Inspired by
-  Dex Horthy's `/show-me` and pstack's `show-me-your-work`.
-- `builder` must not read `standards.md`. `/loop` keeps it out of every brief.
 - `/loop` also loads `issue-tracker.md` (for the spec review) and stops when the same
   review finding repeats or the builder disputes a finding.
+- `/finalize-feature` PR body adds the one smallest view that explains the change
+  (call tree, component tree, diff-shaped file tree, or a small Mermaid diagram),
+  summarizes app-verify evidence, and summarizes the loop decision log. Inspired by
+  Dex Horthy's `/show-me` and pstack's `show-me-your-work`.
+- `builder` must not read `standards.md`; `/loop` keeps it out of every brief.
+- `checker` agent default model is now `haiku`: it runs commands and copies output.
+- `/setup-project-skills` writes six config files (adds `standards.md`), and merges
+  into an existing prose-only `docs/agents/*.md` (e.g. mattpocock/skills'
+  `issue-tracker.md`) instead of overwriting it. The files stay un-namespaced; the
+  README explains why.
+- Skill and plugin descriptions trimmed: trigger phrase first, each use listed once
+  (`verify-feature` first, since it is the one model-invoked skill).
+- README "Adding a new skill" lists the manifest, invocation-list, credit, and
+  validation steps.
 
 ## 1.0.0
 

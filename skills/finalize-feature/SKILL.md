@@ -1,6 +1,6 @@
 ---
 name: finalize-feature
-description: Commit, rebase the feature branch on the base branch, verify via /verify-feature, push, open a PR, and write QA notes on the ticket. Reads per-repo config from docs/agents/ (issue tracker, vcs, stack, quality gates), so it works in any repo and any language.
+description: Finalize a branch — commit, rebase on the base branch, verify, push, open a reviewable PR, and write QA notes on the ticket, per docs/agents/.
 disable-model-invocation: true
 ---
 

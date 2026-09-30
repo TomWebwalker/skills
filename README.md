@@ -322,7 +322,24 @@ Optional subagents. `/loop` runs the same roles inline when these files are not 
    `localhost:4200`, that value belongs in config. Stop conditions and budgets are
    config too — they're the first thing that differs between teams.
 4. Handle the empty case: an unset command means skip the step and say so, not guess.
-5. Symlink it into `~/.claude/skills/`.
+5. List it in **both** `.claude-plugin/plugin.json` and `.cursor-plugin/plugin.json`,
+   and in `USER_INVOKED` or `MODEL_INVOKED` in `scripts/validate-plugin-layout.mjs`
+   (user-invoked skills set `disable-model-invocation: true`).
+6. Credit any source of ideas under **Inspired by**, and add a `CHANGELOG.md` entry.
+7. Run `npm run validate-plugin`.
+
+### Sharing `docs/agents/` with other skill sets
+
+[mattpocock/skills](https://github.com/mattpocock/skills)' setup also writes
+`docs/agents/issue-tracker.md`. The file is **not namespaced** on purpose. Moving it
+to `docs/agents/delivery/` would break every repo already onboarded, and the two
+formats fit in one file: this repo reads the YAML frontmatter, and theirs reads the
+prose sections. `/setup-project-skills` merges into an existing file instead of
+overwriting it. It adds frontmatter and any missing procedure sections, and keeps
+the rest.
+
+With skills.sh, both sets also ship a bare `/handoff`. Install only one, or use the
+plugin, whose commands are namespaced (`/delivery-skills:handoff`).
 
 ## Works well with
 

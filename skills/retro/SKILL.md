@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Retro a session — turn its failed checks, user corrections, and stuck cycles into structural fixes (design, lint/test, gate, config) and apply the ones you approve. Reads per-repo config from docs/agents/.
+description: Retro a session — turn failed checks, user corrections, and stuck cycles into structural fixes (design > lint/test > gate > config > skill text), applying only the ones you approve.
 argument-hint: '[transcript path | "last session"]'
 disable-model-invocation: true
 ---

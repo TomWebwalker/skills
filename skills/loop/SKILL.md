@@ -1,6 +1,6 @@
 ---
 name: loop
-description: Run a build-then-verify loop until the repo's quality gates pass. Dispatches a builder to implement the task and a checker to run the gates, feeding failures back until green or the cycle budget runs out. Reads per-repo config from docs/agents/, so it works in any language.
+description: Loop a task to green — restate and grill the brief, then run builder → checker → reviewer cycles until the gates pass and review is clean, or a stop condition hits. Never pushes.
 argument-hint: '[--no-grill] <task>'
 disable-model-invocation: true
 ---
@@ -35,8 +35,8 @@ If a named subagent isn't installed, don't fail: run that role inline as a phase
 this conversation, holding to the same contract (the build phase edits code and
 reports one line; the check phase runs `/verify-feature` and reports its output
 verbatim; the review phase reads `standards.md` only when it starts and reports
-findings in the reviewer's format). Say once, up front, that you're running inline and how to install the
-bundled agents. If `stack.md#fix_agent` is set, prefer it over the generic builder —
+findings in the reviewer's format). Say once, up front, that you're running inline
+and how to install the bundled agents. If `stack.md#fix_agent` is set, prefer it over the generic builder —
 it knows the framework.
 
 ## Decision log

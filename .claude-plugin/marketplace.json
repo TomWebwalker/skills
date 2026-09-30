@@ -10,7 +10,7 @@
     {
       "name": "delivery-skills",
       "source": "./",
-      "description": "Config-driven start-issue / verify-feature / qa-local / loop / finalize-feature workflows with builder and checker agents.",
+      "description": "Config-driven start-issue / verify-feature / qa-local / loop / finalize-feature / retro / handoff workflows with builder, checker, and reviewer agents.",
       "author": {
         "name": "Tomasz Flis"
       },

@@ -1,6 +1,6 @@
 ---
 name: verify-feature
-description: Run this repo's quality gates (tests, types, lint, build, duplication) and report exactly what failed, without changing any code. Reads per-repo config from docs/agents/ (stack, quality gates), so it works in any language. Use after implementing a change, before finalizing it for review, or as the check half of /loop.
+description: Verify a change — run this repo's quality gates from docs/agents/ (tests, types, lint, build, duplication, app verification) and report exactly what failed, without editing code. Use after implementing a change, before /finalize-feature, and as /loop's checker.
 ---
 
 Model-invoked on purpose — `/loop`'s checker and other skills must be able to reach for this.

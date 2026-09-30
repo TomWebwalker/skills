@@ -1,6 +1,6 @@
 ---
 name: setup-project-skills
-description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, review standards, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Run once per repo before the other delivery skills.
+description: Set up a repo for the delivery skills — detect, confirm, and write docs/agents/ config (issue tracker, branching, stack, quality gates, review standards, topology). Run once per repo, before the other skills.
 disable-model-invocation: true
 ---
 
@@ -167,6 +167,11 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
 
 - Idempotent: if `docs/agents/*.md` already exist, read them, show current values, and
   update in place rather than clobbering.
+- Shared files: other skill sets write `docs/agents/` too — mattpocock/skills' setup
+  writes a prose-only `issue-tracker.md` (and `domain.md`, `triage-labels.md`). When
+  an existing file has no YAML frontmatter, **merge**: add this skill's frontmatter
+  on top and append any of the four procedure sections it lacks, keeping every
+  existing section as it is. Never delete a section or a file you didn't write.
 - Keep each file minimal and true to the repo — delete options that don't apply
   instead of leaving dead config.
 - Prefer commands the repo already scripts (`make test`) over raw toolchain
