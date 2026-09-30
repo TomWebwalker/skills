@@ -32,6 +32,12 @@ All notable changes to this skill set are documented here. Version numbers live 
 
 ### Changed
 
+- `/loop` step 2 brief is now restate-and-grill: the agent looks up facts, restates
+  goal and problem in its own words, then asks one round of numbered decision
+  questions, each with a recommended answer. Skipped with `--no-grill`, or when the
+  ticket's acceptance criteria are confirmed complete. Inspired by Lauren Tan's
+  restate prompt and Matt Pocock's `grilling`.
+- README "Works well with" section.
 - `builder` must not read `standards.md`. `/loop` keeps it out of every brief.
 - `/loop` also loads `issue-tracker.md` (for the spec review) and stops when the same
   review finding repeats or the builder disputes a finding.
