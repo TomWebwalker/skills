@@ -86,7 +86,7 @@ Re-run later to pull updates.
 ```bash
 git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
 cd ~/projects/claude-skills
-for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop retro; do
+for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop retro handoff; do
   ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
 done
 ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
@@ -238,13 +238,13 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 
 ## Skills in this repo
 
-Seven skills under [`skills/`](./skills/) and three loop roles under [`agents/`](./agents/).
+Eight skills under [`skills/`](./skills/) and three loop roles under [`agents/`](./agents/).
 Install path for each skill is `skills/<name>/`; agents are single markdown files.
 Plugin manifests: [`.claude-plugin/`](./.claude-plugin/) (Claude Code) and
 [`.cursor-plugin/`](./.cursor-plugin/) (Cursor) list those paths explicitly.
 
 **Invocation.** Orchestrators
-(`setup-project-skills`, `start-issue`, `loop`, `qa-local`, `finalize-feature`, `retro`) set
+(`setup-project-skills`, `start-issue`, `loop`, `qa-local`, `finalize-feature`, `retro`, `handoff`) set
 `disable-model-invocation: true` — they run only when you type them.
 `verify-feature` stays model-invoked so `/loop`'s checker can reach for it.
 
@@ -276,10 +276,11 @@ Daily delivery. Each skill loads only the config files it needs and degrades whe
 |---|---|---|
 | **[loop](./skills/loop/SKILL.md)** | User | Build → verify until green (or the cycle budget / stop conditions). Optionally pulls companion knowledge from `topology.md`. On green: ask for `/qa-local` (skip when `qa_mode` is `none`), then offer `/finalize-feature` — never push unattended. |
 
-### Learning
+### Learning and handoff
 
 | Skill | Invocation | What it does |
 |---|---|---|
+| **[handoff](./skills/handoff/SKILL.md)** | User | Write branch, ticket, loop state, last checker/reviewer reports, open decisions, and next suggested skills to a temp markdown file another session can resume from. Artifacts are referenced by path, not copied. |
 | **[retro](./skills/retro/SKILL.md)** | User | Turn a session's failed checks, corrections, and stuck cycles into structural fixes — design > lint/test > gate > config > skill text — and apply only the ones you approve. |
 
 Typical happy path:
@@ -340,6 +341,8 @@ config model; no text was copied.
 - **retro** — Matt Pocock's `/retro` ([mattpocock/skills](https://github.com/mattpocock/skills)),
   and Lauren Tan's ([poteto](https://github.com/poteto)) `/reflect` and her rule to
   encode lessons in structure rather than prose.
+- **handoff** — Matt Pocock's `/handoff`
+  ([mattpocock/skills](https://github.com/mattpocock/skills)).
 - **App verification** (`/setup-project-skills` → `verify-<app>`) — pstack's
   `create-verification-skill` by Lauren Tan, and Emil Kowalski's
   ([emilkowalski/skills](https://github.com/emilkowalski/skills)) break-it testing.

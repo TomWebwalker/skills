@@ -12,6 +12,10 @@ All notable changes to this skill set are documented here. Version numbers live 
   change > lint rule or test > gate > `docs/agents/` config > skill text — and applies
   only approved proposals. Inspired by Matt Pocock's `/retro` and Lauren Tan's
   `/reflect`.
+- `/handoff` skill (user-invoked): writes branch, ticket, cycle count, last
+  checker/reviewer reports, open decisions, and next suggested skills to a markdown
+  file under the OS temp dir, referencing artifacts by path. Inspired by Matt
+  Pocock's `/handoff`.
 - Layout check fails when a `skills/` or `agents/` entry on disk is missing from either
   manifest, or a skill is in neither (or both) invocation lists.
 - README "Inspired by" section.

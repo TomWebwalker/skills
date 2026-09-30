@@ -19,6 +19,7 @@ const USER_INVOKED = [
   "qa-local",
   "finalize-feature",
   "retro",
+  "handoff",
 ];
 const MODEL_INVOKED = ["verify-feature"];
 
