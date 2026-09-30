@@ -27,6 +27,10 @@ brief: only the reviewer sees it.
 - **reviewer** (`loop.reviewer_agent`, default `reviewer`; `''` skips review) —
   reviews the green diff against `standards.md` and against the spec. Never edits.
 
+Dispatch each role with the model in `loop.models.<role>` when it is set (the
+dispatch's model override); `''` or a missing key keeps the agent's own default. If
+the host can't override a model, say so once and continue.
+
 If a named subagent isn't installed, don't fail: run that role inline as a phase of
 this conversation, holding to the same contract (the build phase edits code and
 reports one line; the check phase runs `/verify-feature` and reports its output

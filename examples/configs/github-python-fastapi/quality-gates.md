@@ -21,6 +21,7 @@ loop:
   builder_agent: builder
   checker_agent: checker
   reviewer_agent: reviewer
+  models: { builder: sonnet, checker: haiku, reviewer: opus }
   on_exhausted: ask
 ---
 

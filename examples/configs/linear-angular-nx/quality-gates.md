@@ -26,6 +26,7 @@ loop:
   builder_agent: angular-keeper   # stack.md#fix_agent knows the framework
   checker_agent: checker
   reviewer_agent: reviewer
+  models: { builder: sonnet, checker: haiku, reviewer: opus }
   on_exhausted: stop-and-report
 ---
 
