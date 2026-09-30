@@ -202,6 +202,11 @@ Code written to a checklist it has seen passes a review of that checklist withou
 being any better. Rules a tool could enforce are tagged `mechanical`, and `/retro`
 proposes turning the ones that keep recurring into lint rules.
 
+Each role can run on its own model (`quality-gates.md#loop.models`). By default the
+checker runs on a small model, because it only runs commands and copies output. The
+builder runs on `sonnet`, and the reviewer runs on the strongest model, because its
+findings drive every cycle after it.
+
 What stops it is in `quality-gates.md#loop`, not in a `CLAUDE.md` paragraph:
 `max_cycles` caps the budget, and the loop also bails early when the same failure
 repeats twice, when the builder says it's blocked, or when the only way to green would
@@ -343,6 +348,8 @@ config model; no text was copied.
 - **Reviewable PRs + decision log** (`/finalize-feature`, `/loop`) — Dex Horthy's
   `/show-me` ([humanlayer/skills](https://github.com/humanlayer/skills)), and pstack's
   `show-me-your-work`.
+- **Models per role** (`loop.models`) — Emil Kowalski, and pstack's rule of matching
+  model strength to the role.
 - **reviewer + standards.md** — Matt Pocock's `/code-review`, and his point that the
   implementer shouldn't see the standards it will be reviewed against.
 

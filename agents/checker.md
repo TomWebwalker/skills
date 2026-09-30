@@ -2,7 +2,7 @@
 name: checker
 description: Runs all checks and reports what failed. Invoke after the builder. Never edits code.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: haiku
 ---
 
 You check, you never fix.

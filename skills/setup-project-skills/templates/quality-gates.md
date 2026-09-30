@@ -27,6 +27,11 @@ loop:                         # settings for /loop (build → verify → repeat)
   builder_agent: builder      # subagent that writes/fixes code ('' = run inline)
   checker_agent: checker      # subagent that runs verify-feature ('' = run inline)
   reviewer_agent: reviewer    # subagent that reviews the green diff ('' = skip review)
+  models:                     # model per role, passed as a dispatch override
+    builder: sonnet           #   writes code — a strong, fast coder
+    checker: haiku            #   runs commands, copies output — a small model is enough
+    reviewer: opus            #   judges the diff — the strongest you have
+                              #   '' = use the model in the agent's own frontmatter
   on_exhausted: stop-and-report   # stop-and-report | ask
 ---
 
@@ -100,6 +105,13 @@ After the checker reports green, `/loop` dispatches `reviewer_agent` twice in
 parallel: once against `standards.md`, once against the ticket's spec. Findings go
 back to the builder as a normal cycle. Set `reviewer_agent: ''` to skip review — the
 loop then ends at green, as before.
+
+`loop.models` picks a model per role. Spend where judgment is: the checker only runs
+commands and copies their output, so a small model does it well and cheaply; the
+reviewer's findings drive every later cycle, so it gets the strongest. Values are the
+host's model aliases (`haiku`, `sonnet`, `opus` in Claude Code); leave one `''` to use
+the agent's own default. Inline roles run on the conversation's model — the setting
+applies only to dispatched subagents.
 
 ## Worked examples
 

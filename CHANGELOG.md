@@ -30,8 +30,13 @@ All notable changes to this skill set are documented here. Version numbers live 
 - `docs/agents/standards.md` template plus example standards for all three example
   configs. Rules are tagged `judgment` or `mechanical` (candidates for lint).
 
+- New key `loop.models: { builder, checker, reviewer }` in `quality-gates.md`,
+  passed as a model override per dispatch. Defaults: checker `haiku`, builder
+  `sonnet`, reviewer `opus`. Inspired by Emil Kowalski and pstack's models rule.
+
 ### Changed
 
+- `checker` agent default model is now `haiku`: it runs commands and copies output.
 - `/loop` step 2 brief is now restate-and-grill: the agent looks up facts, restates
   goal and problem in its own words, then asks one round of numbered decision
   questions, each with a recommended answer. Skipped with `--no-grill`, or when the
