@@ -38,6 +38,12 @@ All notable changes to this skill set are documented here. Version numbers live 
   ticket's acceptance criteria are confirmed complete. Inspired by Lauren Tan's
   restate prompt and Matt Pocock's `grilling`.
 - README "Works well with" section.
+- `/finalize-feature` PR body adds the one smallest view that explains the change
+  (call tree, component tree, diff-shaped file tree, or a small Mermaid diagram),
+  summarizes app-verify evidence, and summarizes the loop's decision log.
+- `/loop` keeps an append-only TSV decision log
+  (`ts, cycle, decision, why, evidence, result`) under the OS temp dir. Inspired by
+  Dex Horthy's `/show-me` and pstack's `show-me-your-work`.
 - `builder` must not read `standards.md`. `/loop` keeps it out of every brief.
 - `/loop` also loads `issue-tracker.md` (for the spec review) and stops when the same
   review finding repeats or the builder disputes a finding.

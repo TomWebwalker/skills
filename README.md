@@ -324,6 +324,8 @@ Generic helpers that don't need `docs/agents/`, so they aren't duplicated here:
 
 - [mattpocock/skills](https://github.com/mattpocock/skills) `/grill-me` — a longer
   grilling session on a plan before you hand it to `/loop`.
+- [humanlayer/skills](https://github.com/humanlayer/skills) `/show-me` — visual
+  explanations of a change, beyond the one view `/finalize-feature` adds to a PR.
 
 ## Inspired by
 
@@ -338,6 +340,9 @@ config model; no text was copied.
   ([emilkowalski/skills](https://github.com/emilkowalski/skills)) break-it testing.
 - **Restate-and-grill brief** (`/loop` step 2) — Lauren Tan's restate prompt, and
   Matt Pocock's `grilling` skill.
+- **Reviewable PRs + decision log** (`/finalize-feature`, `/loop`) — Dex Horthy's
+  `/show-me` ([humanlayer/skills](https://github.com/humanlayer/skills)), and pstack's
+  `show-me-your-work`.
 - **reviewer + standards.md** — Matt Pocock's `/code-review`, and his point that the
   implementer shouldn't see the standards it will be reviewed against.
 
