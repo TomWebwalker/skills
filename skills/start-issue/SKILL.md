@@ -1,6 +1,6 @@
 ---
 name: start-issue
-description: Update the base branch, create a feature branch for a ticket, and set the ticket in progress. Reads per-repo config from docs/agents/ (issue tracker, branching model), so it works in any repo and any language.
+description: Start a ticket — update the base branch, create the feature branch, and set the ticket in progress, per docs/agents/.
 disable-model-invocation: true
 ---
 

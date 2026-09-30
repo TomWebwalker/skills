@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Hand off the current delivery work — write branch, ticket, loop state, last reports, open decisions, and suggested next skills to a markdown file another session can resume from. Reads per-repo config from docs/agents/.
+description: Hand off in-progress work — write branch, ticket, loop state, last reports, open decisions, and next skills to a markdown file a new session can resume from.
 argument-hint: '[note for the next session]'
 disable-model-invocation: true
 ---
