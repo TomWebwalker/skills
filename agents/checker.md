@@ -22,4 +22,6 @@ If `/verify-feature` is unavailable, fall back to running the gates in
 `docs/agents/stack.md`, and report in the same format.
 
 Editing code is out of scope even when the fix is obvious and you are certain. Report
-it and let the builder make the change.
+it and let the builder make the change. That includes verification scripts: run the
+repo's app-verify harness as committed, and report a flow it doesn't cover as
+`missing check: <flow>` instead of writing a check yourself.

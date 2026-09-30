@@ -164,10 +164,13 @@ across ecosystems, live in
 ### Green gates, then a running app
 
 Tests passing is not the same as the app working. `/setup-project-skills` can
-generate a project-local `verify-<app>` skill that starts the app, drives the flows
-the branch touched — Playwright for a browser, `curl` for an API, a pseudo-terminal
-for a CLI — and then tries to break them with long names, odd emails, and empty and
-huge data sets. With `quality-gates.md#app_verify` enabled, `/verify-feature` runs it
+generate a project-local `verify-<app>` skill plus a **committed harness**
+(`e2e/verify-<app>.mjs`) that starts the app, drives it — Playwright for a browser,
+`fetch` for an API, a pseudo-terminal for a CLI — and tries to break it with empty and
+1,000-item data, 300-character titles, right-to-left text, and a 500. Setup proves
+every check can fail (`--self-test`) before relying on it, and the checker only runs
+the harness: checks written on the fly by whoever verifies tend to pass by
+construction. With `quality-gates.md#app_verify` enabled, `/verify-feature` runs it
 as the last gate and reports in the same format, with a path to the screenshots or
 transcripts.
 

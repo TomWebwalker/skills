@@ -29,4 +29,7 @@ companion repo unless the task says to.
 - Don't read `docs/agents/standards.md`. It belongs to the reviewer, who checks your
   diff against it after the gates pass. Code written to a checklist you've seen makes
   that review an echo. If a reviewer finding cites a rule, fix what it names.
+- When the task adds a user-visible flow and the repo has an app-verify harness
+  (`e2e/verify-<app>.mjs`), add a check for that flow there, or fix the one a
+  `missing check:` line names. It's code: the reviewer reviews it.
 - Report what you changed in one line.
