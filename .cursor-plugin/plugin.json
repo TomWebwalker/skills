@@ -25,7 +25,8 @@
     "./skills/qa-local",
     "./skills/loop",
     "./skills/finalize-feature",
-    "./skills/retro"
+    "./skills/retro",
+    "./skills/handoff"
   ],
   "agents": [
     "./agents/builder.md",
