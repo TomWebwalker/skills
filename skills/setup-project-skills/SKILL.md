@@ -80,7 +80,10 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    *Review standards* — `CONTRIBUTING.md`, style guides under `docs/`, conventions
    in `CLAUDE.md`/`AGENTS.md`, and recurring themes in recent PR review comments
    (`gh pr list --state merged -L 20` then `gh pr view <n> --comments`). Drop
-   anything a linter or formatter in the gates already enforces.
+   anything a linter or formatter in the gates already enforces. Always keep one rule
+   that a behavior change comes with a test that fails without it (the template's
+   `S4`) — without it the reviewer has nothing to cite when new behavior ships with
+   only end-to-end coverage.
 
 2. **Confirm.** Present what you detected per axis and ask the user to correct
    anything. Resolve at minimum: tracker type + id pattern + status names; base
@@ -118,14 +121,17 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - Name it `verify-<app>` after the app (`verify-web`, `verify-api`, `verify-tool`)
      and write it to `.claude/skills/verify-<app>/SKILL.md` in the target repo from
      the bundled `templates/verify-app.md`.
-   - Fill in the real start command, the readiness check (a health URL, a port, or a
-     log line — find it in the code, don't guess), and keep only the drive section for
-     this `qa_mode`: a Playwright script for `browser`, `curl` for `api`, a
-     pseudo-terminal for `cli`/`tui`.
-   - Keep the adversarial pass (long names, odd emails, empty and huge data sets) and
-     tailor its inputs to the forms, fields, or flags this app actually accepts.
-   - For `browser`, check that Playwright is installed (`npx playwright --version`);
-     if not, say what to add rather than installing it unasked.
+   - Write its **committed harness**, `e2e/verify-<app>.mjs`, as the template's "The
+     harness" section describes: one function per check, the fixed hostile pass, and a
+     `--self-test` mode. Tailor the checks to the screens, endpoints, or flags this app
+     has. Whoever runs verification later only runs this file — nobody writes checks
+     on the fly, because on-the-fly checks tend to pass by construction.
+   - Fill in the real start command and the readiness check (a health URL, a port, or a
+     log line — find it in the code, don't guess).
+   - For `browser`, the harness needs `playwright` as a devDependency. Ask before
+     adding it; if the user declines, set `app_verify.enabled: false`.
+   - **Prove it can fail:** run `--self-test` and confirm every check fails on its bad
+     fixture. A check that passes a bad fixture is rewritten before setup continues.
    - On yes, set `quality-gates.md#app_verify` to `{ enabled: true, skill: verify-<app> }`.
      On no, write `enabled: false` and move on.
 

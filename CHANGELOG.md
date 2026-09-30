@@ -62,6 +62,15 @@ All notable changes to this skill set are documented here. Version numbers live 
   (`verify-feature` first, since it is the one model-invoked skill).
 - README "Adding a new skill" lists the manifest, invocation-list, credit, and
   validation steps.
+- App verification runs a committed, self-tested harness (`e2e/verify-<app>.mjs`)
+  instead of a script the checker writes each run. Setup generates it and proves each
+  check fails on a bad fixture; the checker and `/verify-feature` only run it and
+  report `missing check:` for uncovered flows; the builder adds flow checks with the
+  feature. Cases the app can't reach are reported as `skipped:`, not dropped. Found by
+  `/retro` on a rehearsal where the checker's own scripts passed by construction
+  three times.
+- Setup always keeps a "behavior change comes with a test" standard, so the reviewer
+  can flag new behavior that only has end-to-end coverage.
 
 ## 1.0.0
 

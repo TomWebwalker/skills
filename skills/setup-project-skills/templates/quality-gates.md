@@ -82,9 +82,9 @@ Pre-existing clones in untouched files may be left for this PR.
 
 The gates above prove the code compiles and its tests pass; they don't prove the app
 works when a person uses it. `/setup-project-skills` can generate a project-local
-`verify-<app>` skill (under `.claude/skills/`) that starts the app, drives the flows
-the branch touched per `stack.md#qa_mode`, tries hostile input, and saves screenshots
-or transcripts as evidence.
+`verify-<app>` skill (under `.claude/skills/`) and a committed, self-tested harness
+(`e2e/verify-<app>.mjs`) that starts the app, drives it per `stack.md#qa_mode`, tries
+hostile input, and saves screenshots or transcripts as evidence.
 
 When `app_verify.enabled` is true, `/verify-feature` runs `app_verify.skill` as its
 **last** gate — after everything cheaper has passed — and merges its report. It is
