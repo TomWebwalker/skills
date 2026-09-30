@@ -4,6 +4,18 @@ All notable changes to this skill set are documented here. Version numbers live 
 `package.json` and are synced into `.claude-plugin/plugin.json` and
 `.cursor-plugin/plugin.json` via `npm run sync-plugin-version`.
 
+## Unreleased
+
+### Added
+
+- `/retro` skill (user-invoked): routes session lessons to the strongest fix — design
+  change > lint rule or test > gate > `docs/agents/` config > skill text — and applies
+  only approved proposals. Inspired by Matt Pocock's `/retro` and Lauren Tan's
+  `/reflect`.
+- Layout check fails when a `skills/` or `agents/` entry on disk is missing from either
+  manifest, or a skill is in neither (or both) invocation lists.
+- README "Inspired by" section.
+
 ## 1.0.0
 
 ### Added

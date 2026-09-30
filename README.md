@@ -85,7 +85,7 @@ Re-run later to pull updates.
 ```bash
 git clone https://github.com/TomWebwalker/skills.git ~/projects/claude-skills
 cd ~/projects/claude-skills
-for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop; do
+for s in setup-project-skills start-issue qa-local verify-feature finalize-feature loop retro; do
   ln -sfn "$PWD/skills/$s" ~/.claude/skills/"$s"
 done
 ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
@@ -207,13 +207,13 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 
 ## Skills in this repo
 
-Six skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
+Seven skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
 Install path for each skill is `skills/<name>/`; agents are single markdown files.
 Plugin manifests: [`.claude-plugin/`](./.claude-plugin/) (Claude Code) and
 [`.cursor-plugin/`](./.cursor-plugin/) (Cursor) list those paths explicitly.
 
 **Invocation.** Orchestrators
-(`setup-project-skills`, `start-issue`, `loop`, `qa-local`, `finalize-feature`) set
+(`setup-project-skills`, `start-issue`, `loop`, `qa-local`, `finalize-feature`, `retro`) set
 `disable-model-invocation: true` — they run only when you type them.
 `verify-feature` stays model-invoked so `/loop`'s checker can reach for it.
 
@@ -244,6 +244,12 @@ Daily delivery. Each skill loads only the config files it needs and degrades whe
 | Skill | Invocation | What it does |
 |---|---|---|
 | **[loop](./skills/loop/SKILL.md)** | User | Build → verify until green (or the cycle budget / stop conditions). Optionally pulls companion knowledge from `topology.md`. On green: ask for `/qa-local` (skip when `qa_mode` is `none`), then offer `/finalize-feature` — never push unattended. |
+
+### Learning
+
+| Skill | Invocation | What it does |
+|---|---|---|
+| **[retro](./skills/retro/SKILL.md)** | User | Turn a session's failed checks, corrections, and stuck cycles into structural fixes — design > lint/test > gate > config > skill text — and apply only the ones you approve. |
 
 Typical happy path:
 
@@ -284,6 +290,15 @@ Optional subagents. `/loop` runs the same roles inline when these files are not 
    config too — they're the first thing that differs between teams.
 4. Handle the empty case: an unset command means skip the step and say so, not guess.
 5. Symlink it into `~/.claude/skills/`.
+
+## Inspired by
+
+Ideas below were reimplemented in our own words and fitted to the `docs/agents/`
+config model; no text was copied.
+
+- **retro** — Matt Pocock's `/retro` ([mattpocock/skills](https://github.com/mattpocock/skills)),
+  and Lauren Tan's ([poteto](https://github.com/poteto)) `/reflect` and her rule to
+  encode lessons in structure rather than prose.
 
 ## License
 
