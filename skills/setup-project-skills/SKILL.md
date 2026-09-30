@@ -104,7 +104,25 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - `docs/agents/quality-gates.md`
    - `docs/agents/topology.md`
 
-4. **Write the pointer block.** Add (or update) an `## Agent skills` section in
+4. **Generate app verification (optional).** Skip when `qa_mode` is `none`, or when
+   the app can't be started (`commands.dev` empty and, for `cli`, `commands.build`
+   empty too). Otherwise offer to write a project-local skill that proves the app
+   works, not just that its tests pass:
+   - Name it `verify-<app>` after the app (`verify-web`, `verify-api`, `verify-tool`)
+     and write it to `.claude/skills/verify-<app>/SKILL.md` in the target repo from
+     the bundled `templates/verify-app.md`.
+   - Fill in the real start command, the readiness check (a health URL, a port, or a
+     log line — find it in the code, don't guess), and keep only the drive section for
+     this `qa_mode`: a Playwright script for `browser`, `curl` for `api`, a
+     pseudo-terminal for `cli`/`tui`.
+   - Keep the adversarial pass (long names, odd emails, empty and huge data sets) and
+     tailor its inputs to the forms, fields, or flags this app actually accepts.
+   - For `browser`, check that Playwright is installed (`npx playwright --version`);
+     if not, say what to add rather than installing it unasked.
+   - On yes, set `quality-gates.md#app_verify` to `{ enabled: true, skill: verify-<app> }`.
+     On no, write `enabled: false` and move on.
+
+5. **Write the pointer block.** Add (or update) an `## Agent skills` section in
    `CLAUDE.md` (or `AGENTS.md` if that's what the repo uses):
 
    ```markdown
@@ -120,15 +138,17 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    To re-run setup: `/setup-project-skills`.
    ```
 
-5. **Verify.** Before reporting, dry-run the cheapest configured command (e.g.
+6. **Verify.** Before reporting, dry-run the cheapest configured command (e.g.
    `commands.lint` or `--version` on the toolchain) to confirm the command map is
-   real, not aspirational. Report anything that failed instead of leaving it to be
-   discovered mid-workflow. If `topology.md` names a companion `path`, check that it
+   real, not aspirational. If a `verify-<app>` skill was generated, run it once so
+   the readiness check is proven before `/verify-feature` depends on it. Report
+   anything that failed instead of leaving it to be discovered mid-workflow. If `topology.md` names a companion `path`, check that it
    exists on disk; if missing, note that `/loop` will fall back to `url`.
 
-6. **Report.** Summarize the five files, note which steps the workflow skills will
+7. **Report.** Summarize the five files, note which steps the workflow skills will
    skip given the config (no tracker → no ticket steps; `qa_mode: none` → no manual
-   QA; empty `dev` → qa-local can't serve the app; `topology.role` full-stack or
+   QA; empty `dev` → qa-local can't serve the app; `app_verify.enabled: false` → no
+   end-to-end gate; `topology.role` full-stack or
    standalone → `/loop` skips companion knowledge). If `/loop` will be used, say
    whether the configured builder/checker subagents are actually installed — if not,
    it runs both roles inline, which works but shares this conversation's context.

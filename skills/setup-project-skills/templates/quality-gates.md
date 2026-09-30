@@ -19,6 +19,9 @@ dup_check:
   enabled: false              # true only if CI/Sonar enforces a duplication rule
   cmd: ''                     # full command, e.g. the jscpd invocation below
   scope: changed-files        # changed-files | whole-repo — what must be clean for this PR
+app_verify:                   # optional last gate: drive the running app (see below)
+  enabled: false              # true once a verify-<app> skill exists in this repo
+  skill: ''                   # project-local skill name, e.g. 'verify-web' ('' = none)
 loop:                         # settings for /loop (build → verify → repeat)
   max_cycles: 5               # cycle budget before the loop hands back to a human
   builder_agent: builder      # subagent that writes/fixes code ('' = run inline)
@@ -69,6 +72,19 @@ git diff --name-only <base_branch>...HEAD
 
 Pre-existing clones in untouched files may be left for this PR.
 
+## App verification
+
+The gates above prove the code compiles and its tests pass; they don't prove the app
+works when a person uses it. `/setup-project-skills` can generate a project-local
+`verify-<app>` skill (under `.claude/skills/`) that starts the app, drives the flows
+the branch touched per `stack.md#qa_mode`, tries hostile input, and saves screenshots
+or transcripts as evidence.
+
+When `app_verify.enabled` is true, `/verify-feature` runs `app_verify.skill` as its
+**last** gate — after everything cheaper has passed — and merges its report. It is
+marked `blocked` when an earlier gate failed the build, and `skipped` when the skill
+isn't installed.
+
 ## Loop
 
 `/loop` builds and verifies in cycles until the gates above pass. `loop.max_cycles`
@@ -102,6 +118,7 @@ dup_check:
     --reporters consoleFull --silent
     --ignore "**/node_modules/**,**/dist/**,**/coverage/**,**/*.spec.*,**/*.test.*,**/e2e/**"
     apps libs
+app_verify: { enabled: true, skill: verify-web }
 ```
 </details>
 
@@ -117,6 +134,7 @@ gates:
   - { name: typecheck, cmd: 'stack.commands.typecheck' }
   - { name: test,      cmd: 'stack.commands.test' }
 dup_check: { enabled: false }
+app_verify: { enabled: true, skill: verify-api }
 ```
 </details>
 
@@ -137,5 +155,6 @@ dup_check: { enabled: false }
 
 - No validator? `validator: ''` — write good messages, skip the check.
 - No duplication service? `dup_check.enabled: false` and drop the gate.
+- Library or `qa_mode: none`? `app_verify.enabled: false` — there is no app to drive.
 - Gates should mirror CI exactly. A gate CI doesn't run is wasted local time; a CI
   check missing from `gates` is a surprise failure after push.

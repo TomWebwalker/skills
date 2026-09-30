@@ -15,6 +15,9 @@ dup_check:
   enabled: false
   cmd: ''
   scope: changed-files
+app_verify:
+  enabled: false                # set true with skill: verify-tool once it's generated
+  skill: ''
 loop:
   max_cycles: 5
   builder_agent: builder
