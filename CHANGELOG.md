@@ -15,6 +15,13 @@ All notable changes to this skill set are documented here. Version numbers live 
 - Layout check fails when a `skills/` or `agents/` entry on disk is missing from either
   manifest, or a skill is in neither (or both) invocation lists.
 - README "Inspired by" section.
+- App verification: `/setup-project-skills` can generate a project-local
+  `verify-<app>` skill (template `templates/verify-app.md`) that starts the app,
+  drives changed flows per `qa_mode` (Playwright / `curl` / pseudo-terminal), runs an
+  adversarial input pass, and saves evidence. New optional key
+  `quality-gates.md#app_verify: { enabled, skill }`; when enabled, `/verify-feature`
+  runs it as the last gate. Inspired by pstack `create-verification-skill` and Emil
+  Kowalski's break-it testing.
 
 ## 1.0.0
 

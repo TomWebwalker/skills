@@ -18,6 +18,9 @@ dup_check:
     --reporters consoleFull --silent
     --ignore "**/node_modules/**,**/dist/**,**/coverage/**,**/*.spec.ts,**/test-setup.ts,**/jest.config.ts,**/jest.preset.js,**/*.stories.ts,**/.storybook/**,**/e2e/**"
     apps libs
+app_verify:
+  enabled: true
+  skill: verify-web             # .claude/skills/verify-web — Playwright against npm start
 loop:
   max_cycles: 5
   builder_agent: angular-keeper   # stack.md#fix_agent knows the framework
@@ -45,6 +48,12 @@ git commit -F /tmp/commit-msg.txt
 ```
 
 A single long `-m "paragraph"` is ONE physical line and will fail `body-max-line-length`.
+
+## App verification
+
+`verify-web` serves the app with `npm start`, walks the routes the branch touched with
+a Playwright script, and retries each form with long names, odd emails, and empty and
+1,000-row lists. Screenshots land in the run directory it prints.
 
 ## Duplication
 

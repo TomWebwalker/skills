@@ -13,6 +13,9 @@ dup_check:
   enabled: false
   cmd: ''
   scope: changed-files
+app_verify:
+  enabled: true
+  skill: verify-api             # .claude/skills/verify-api — curl against uvicorn on :8000
 loop:
   max_cycles: 4
   builder_agent: builder
@@ -40,6 +43,13 @@ Refs: #42
 `pre-commit run --all-files` covers ruff lint + format, so there is no separate lint
 gate — it would duplicate the hook run. `mypy` and `pytest` run separately because CI
 runs them as separate jobs.
+
+## App verification
+
+`verify-api` brings up Postgres and Redis, starts uvicorn, waits on `GET /health`, then
+`curl`s every endpoint the branch touched — happy path plus hostile bodies (300-char
+names, `"quoted"@example.com`, empty and oversized lists). Request/response
+transcripts are the evidence.
 
 ## Duplication
 

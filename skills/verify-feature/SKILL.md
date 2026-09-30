@@ -32,7 +32,15 @@ Track the gates as a task list and mark them as they complete.
    `dup_check.cmd`. With `scope: changed-files`, only clones touching a file in
    `git diff --name-only <vcs.base_branch>...HEAD` count as failures; report
    pre-existing clones elsewhere as informational.
-3. **Report** in the exact format below. Nothing else — no summary paragraph, no
+3. **App verification** when `quality-gates.md#app_verify.enabled`: run the
+   project-local skill named in `app_verify.skill` as the **last** gate. It starts the
+   app, drives the changed flows, and returns a report in this same format, plus an
+   `evidence:` line. Merge its failure lines into yours.
+   - Any earlier gate failed → mark it `blocked: app_verify (<gate> failed)`; driving
+     an app that doesn't build proves nothing.
+   - Skill not installed → `skipped: app_verify (skill <name> not found)` and suggest
+     re-running `/setup-project-skills` to generate it.
+4. **Report** in the exact format below. Nothing else — no summary paragraph, no
    suggested fixes.
 
 ## Report format
@@ -67,3 +75,6 @@ Rules for the report:
   skipped: typecheck (no command configured)
   blocked: e2e (build failed)
   ```
+
+- When app verification ran, end with its `evidence: <run dir>` line — green or not.
+  `/finalize-feature` links it from the PR.

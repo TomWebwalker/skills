@@ -155,6 +155,16 @@ paths) move to config. Annotated schemas for every key, each with worked example
 across ecosystems, live in
 [`skills/setup-project-skills/templates/`](./skills/setup-project-skills/templates/).
 
+### Green gates, then a running app
+
+Tests passing is not the same as the app working. `/setup-project-skills` can
+generate a project-local `verify-<app>` skill that starts the app, drives the flows
+the branch touched — Playwright for a browser, `curl` for an API, a pseudo-terminal
+for a CLI — and then tries to break them with long names, odd emails, and empty and
+huge data sets. With `quality-gates.md#app_verify` enabled, `/verify-feature` runs it
+as the last gate and reports in the same format, with a path to the screenshots or
+transcripts.
+
 ### QA isn't only a browser
 
 `stack.md#qa_mode` tells `/qa-local` how a human verifies this project: `browser` for
@@ -299,6 +309,9 @@ config model; no text was copied.
 - **retro** — Matt Pocock's `/retro` ([mattpocock/skills](https://github.com/mattpocock/skills)),
   and Lauren Tan's ([poteto](https://github.com/poteto)) `/reflect` and her rule to
   encode lessons in structure rather than prose.
+- **App verification** (`/setup-project-skills` → `verify-<app>`) — pstack's
+  `create-verification-skill` by Lauren Tan, and Emil Kowalski's
+  ([emilkowalski/skills](https://github.com/emilkowalski/skills)) break-it testing.
 
 ## License
 
