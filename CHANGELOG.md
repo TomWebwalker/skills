@@ -22,6 +22,19 @@ All notable changes to this skill set are documented here. Version numbers live 
   `quality-gates.md#app_verify: { enabled, skill }`; when enabled, `/verify-feature`
   runs it as the last gate. Inspired by pstack `create-verification-skill` and Emil
   Kowalski's break-it testing.
+- `reviewer` agent: read-only. After `ALL GREEN`, `/loop` dispatches it twice in
+  parallel, once on the **standards** axis (`docs/agents/standards.md`) and once on
+  the **spec** axis (the ticket). Findings go back to the builder as a normal cycle.
+  New key `loop.reviewer_agent` (`''` = skip). Inspired by Matt Pocock's
+  `/code-review`.
+- `docs/agents/standards.md` template plus example standards for all three example
+  configs. Rules are tagged `judgment` or `mechanical` (candidates for lint).
+
+### Changed
+
+- `builder` must not read `standards.md`. `/loop` keeps it out of every brief.
+- `/loop` also loads `issue-tracker.md` (for the spec review) and stops when the same
+  review finding repeats or the builder disputes a finding.
 
 ## 1.0.0
 

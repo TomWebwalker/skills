@@ -26,14 +26,15 @@ Two ways in, two philosophies. **Pick one** — installing both leaves every ski
 twice (bare `/loop` from skills.sh and namespaced `/delivery-skills:loop` from the
 plugin), and updates will diverge.
 
-- **Plugin** — subscribe to a managed bundle (skills + `builder` / `checker` agents).
+- **Plugin** — subscribe to a managed bundle (skills + `builder` / `checker` /
+  `reviewer` agents).
   Updates when you bump the plugin version.
 - **skills.sh** — copy editable skill files you own. Pull updates with
   `npx skills update` when you choose.
 
 ### Option A — install as a plugin (recommended for teams)
 
-Skills **and** the `builder` / `checker` agents ship together. Invocations are
+Skills **and** the `builder` / `checker` / `reviewer` agents ship together. Invocations are
 namespaced as `/delivery-skills:<skill>` (for example `/delivery-skills:loop`).
 
 **Claude Code** — add the marketplace, then install:
@@ -90,6 +91,7 @@ for s in setup-project-skills start-issue qa-local verify-feature finalize-featu
 done
 ln -sfn "$PWD/agents/builder.md" ~/.claude/agents/builder.md
 ln -sfn "$PWD/agents/checker.md" ~/.claude/agents/checker.md
+ln -sfn "$PWD/agents/reviewer.md" ~/.claude/agents/reviewer.md
 ```
 
 </details>
@@ -101,11 +103,12 @@ roles yourself (the plugin path already includes them):
 mkdir -p ~/.claude/agents
 curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/builder.md -o ~/.claude/agents/builder.md
 curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/checker.md -o ~/.claude/agents/checker.md
+curl -sL https://raw.githubusercontent.com/TomWebwalker/skills/main/agents/reviewer.md -o ~/.claude/agents/reviewer.md
 ```
 
-Skip the agents if you like — `/loop` runs both roles inline when they are absent.
-Separate agents are better: the builder never sees the full gate output and the
-checker never sees the diff rationale.
+Skip the agents if you like — `/loop` runs every role inline when they are absent.
+Separate agents are better: the builder never sees the full gate output or the review
+standards, and the checker and reviewer never see the diff rationale.
 
 ### Onboard a repo
 
@@ -118,6 +121,8 @@ In any repo you want to use these skills, run **`/setup-project-skills`** (or
 - Detect and confirm your **topology** (full-stack, frontend, backend, or standalone —
   and where the companion API/UI repo lives when the stack is split)
 - Detect and confirm your **quality gates** (commit rules, pre-push checks)
+- Propose your **review standards** from `CONTRIBUTING.md`, conventions, and past PR
+  comments, for the reviewer agent
 
 It reads whichever manifest your repo actually has—`package.json`, `pyproject.toml`,
 `go.mod`, `Cargo.toml`, `pom.xml`, `Gemfile`, `Makefile`—and takes gates from your
@@ -145,6 +150,7 @@ skills/                                    each onboarded repo/
   qa-local/               ──reads───>          stack.md           # language, commands, QA mode
   finalize-feature/       ──reads───>          quality-gates.md   # commit rules, gates, loop settings
   loop/                   ──reads───>          topology.md        # full-stack vs companion UI/API
+  agents/reviewer         ──reads───>          standards.md       # review rules (builder never reads)
                                          CLAUDE.md  (## Agent skills pointer block)
 ```
 
@@ -186,6 +192,13 @@ brief, then alternates **builder** → **checker** until `/verify-feature` retur
 never runs the gates, the checker runs the gates and never writes code. A single agent
 doing both drifts toward declaring itself done.
 
+Green isn't the end. A **reviewer** then reads the diff twice, in parallel: once
+against `docs/agents/standards.md` and once against the ticket's spec. Its findings
+go back to the builder as a normal cycle. The builder never reads `standards.md`.
+Code written to a checklist it has seen passes a review of that checklist without
+being any better. Rules a tool could enforce are tagged `mechanical`, and `/retro`
+proposes turning the ones that keep recurring into lint rules.
+
 What stops it is in `quality-gates.md#loop`, not in a `CLAUDE.md` paragraph:
 `max_cycles` caps the budget, and the loop also bails early when the same failure
 repeats twice, when the builder says it's blocked, or when the only way to green would
@@ -217,7 +230,7 @@ kept under [`examples/linear-angular/`](./examples/linear-angular/) as the befor
 
 ## Skills in this repo
 
-Seven skills under [`skills/`](./skills/) and two loop roles under [`agents/`](./agents/).
+Seven skills under [`skills/`](./skills/) and three loop roles under [`agents/`](./agents/).
 Install path for each skill is `skills/<name>/`; agents are single markdown files.
 Plugin manifests: [`.claude-plugin/`](./.claude-plugin/) (Claude Code) and
 [`.cursor-plugin/`](./.cursor-plugin/) (Cursor) list those paths explicitly.
@@ -270,7 +283,7 @@ Typical happy path:
 /start-issue ──► implement ──► /verify-feature ──► /qa-local ──► /finalize-feature
                      ▲                │
                      └──── /loop ─────┘
-              (builder ↔ checker until green, then QA ask)
+   (builder ↔ checker until green, reviewer until clean, then QA ask)
 ```
 
 ### Agents (for `/loop`)
@@ -281,6 +294,7 @@ Optional subagents. `/loop` runs the same roles inline when these files are not 
 |---|---|
 | **[builder](./agents/builder.md)** | Writes and fixes code. Never runs the gates. `/loop` may dispatch `stack.md#fix_agent` instead when set. |
 | **[checker](./agents/checker.md)** | Runs `/verify-feature` and reports `ALL GREEN` or `FAILED`. Never edits. |
+| **[reviewer](./agents/reviewer.md)** | After green, reviews the diff on one axis per dispatch — `standards.md` or the ticket spec — and reports findings. Never edits. |
 
 ### Examples
 
@@ -312,6 +326,8 @@ config model; no text was copied.
 - **App verification** (`/setup-project-skills` → `verify-<app>`) — pstack's
   `create-verification-skill` by Lauren Tan, and Emil Kowalski's
   ([emilkowalski/skills](https://github.com/emilkowalski/skills)) break-it testing.
+- **reviewer + standards.md** — Matt Pocock's `/code-review`, and his point that the
+  implementer shouldn't see the standards it will be reviewed against.
 
 ## License
 

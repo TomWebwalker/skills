@@ -8,22 +8,27 @@ disable-model-invocation: true
 Run this task as a loop: `$ARGUMENTS`
 
 **Load config first.** Read `docs/agents/vcs.md`, `docs/agents/stack.md`,
-`docs/agents/quality-gates.md`, and `docs/agents/topology.md` (if present). If the
-first three are missing, suggest `/setup-project-skills` and fall back to
-`loop.max_cycles: 5`. Every command, branch name, and stop condition below comes
-from config — nothing about this loop is repo-specific. Missing `topology.md`
-means treat the repo as self-contained (same as `role: standalone`).
+`docs/agents/quality-gates.md`, and — if present — `docs/agents/issue-tracker.md`
+and `docs/agents/topology.md`. If the first three are missing, suggest
+`/setup-project-skills` and fall back to `loop.max_cycles: 5`. Every command, branch
+name, and stop condition below comes from config — nothing about this loop is
+repo-specific. Missing `topology.md` means treat the repo as self-contained (same as
+`role: standalone`). **Don't read `docs/agents/standards.md`** and never put it in a
+brief: only the reviewer sees it.
 
-**Roles.** The loop dispatches two subagents, named in `quality-gates.md#loop`:
+**Roles.** The loop dispatches up to three subagents, named in `quality-gates.md#loop`:
 
 - **builder** (`loop.builder_agent`, default `builder`) — writes and fixes code.
 - **checker** (`loop.checker_agent`, default `checker`) — runs `/verify-feature` and
   reports. Never edits.
+- **reviewer** (`loop.reviewer_agent`, default `reviewer`; `''` skips review) —
+  reviews the green diff against `standards.md` and against the spec. Never edits.
 
 If a named subagent isn't installed, don't fail: run that role inline as a phase of
 this conversation, holding to the same contract (the build phase edits code and
 reports one line; the check phase runs `/verify-feature` and reports its output
-verbatim). Say once, up front, that you're running inline and how to install the
+verbatim; the review phase reads `standards.md` only when it starts and reports
+findings in the reviewer's format). Say once, up front, that you're running inline and how to install the
 bundled agents. If `stack.md#fix_agent` is set, prefer it over the generic builder —
 it knows the framework.
 
@@ -56,12 +61,26 @@ it knows the framework.
 5. **Check.** Dispatch the checker. It runs `/verify-feature` and returns either
    `ALL GREEN` or `FAILED` with one line per cause.
 6. **Branch on the result.**
-   - `ALL GREEN` → go to step 8.
+   - `ALL GREEN` → go to step 7.
    - `FAILED` → go back to step 4 with the failures.
-7. **Count out loud.** Announce the cycle number before each build ("cycle 2 of 5").
+7. **Review.** If `loop.reviewer_agent` is `''`, go to step 9. Otherwise dispatch the
+   reviewer **twice, in parallel** (both calls in one message), each with the diff
+   range `<base_branch>...HEAD`:
+   - `axis: standards` — skip, and say so, when `standards.md` is missing or has no
+     rules.
+   - `axis: spec` — include the ticket text (fetched per `issue-tracker.md` from the
+     id in the branch name) or, with no tracker, the brief from step 2.
+
+   Pass the diff range and the spec only — never the builder's reasoning, or the
+   review inherits its blind spots.
+   - Both `REVIEW CLEAN` (or skipped) → go to step 9.
+   - Any `FINDINGS` → go back to step 4 with the findings, unchanged, as a normal
+     cycle: build, check, then review again. It counts toward `loop.max_cycles`.
+8. **Count out loud.** Announce the cycle number before each build ("cycle 2 of 5").
    Stop at `loop.max_cycles`.
-8. **Finish.** On green, stop and show the result: what changed, which gates ran, and
-   anything skipped (including whether companion knowledge was used).
+9. **Finish.** On green and clean review, stop and show the result: what changed,
+   which gates ran, the review result per axis, and anything skipped (including
+   whether companion knowledge was used).
    - If `stack.md#qa_mode` is `none`, skip local QA.
    - Otherwise ask whether `/qa-local` is needed; if yes, run it (fixes that surface
      there go through the same builder/`fix_agent` path — do not reopen the build
@@ -73,8 +92,11 @@ it knows the framework.
 
 Stop immediately, before the budget is spent, when:
 
-- The **same failure** appears in two consecutive checker reports. The builder isn't
-  converging; more cycles won't help. Report the stuck failure and hand it back.
+- The **same failure** appears in two consecutive checker reports, or the **same
+  finding** in two consecutive reviews. The builder isn't converging; more cycles
+  won't help. Report the stuck item and hand it back.
+- The builder **disputes a review finding** (the rule is wrong for this case, or the
+  spec is). That's a decision for a human — show both sides and ask.
 - The builder reports it **can't make the change** (missing dependency, ambiguous
   requirement, a decision that isn't yours to make).
 - A fix would require **weakening a check** — deleting a test, loosening a lint rule,

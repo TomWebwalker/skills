@@ -20,6 +20,7 @@ loop:
   max_cycles: 4
   builder_agent: builder
   checker_agent: checker
+  reviewer_agent: reviewer
   on_exhausted: ask
 ---
 

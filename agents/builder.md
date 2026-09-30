@@ -26,4 +26,7 @@ companion repo unless the task says to.
   confirm a fix is fine.
 - If you can't make the change — missing dependency, ambiguous requirement, a
   decision that isn't yours — say so plainly instead of guessing.
+- Don't read `docs/agents/standards.md`. It belongs to the reviewer, who checks your
+  diff against it after the gates pass. Code written to a checklist you've seen makes
+  that review an echo. If a reviewer finding cites a rule, fix what it names.
 - Report what you changed in one line.

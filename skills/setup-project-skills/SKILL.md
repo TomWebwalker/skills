@@ -1,6 +1,6 @@
 ---
 name: setup-project-skills
-description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Run once per repo before the other delivery skills.
+description: Configure a repository so the generic workflow skills (start-issue, qa-local, finalize-feature, loop) know its issue tracker, branching model, stack, quality gates, review standards, and UI/API topology (full-stack vs companion repos). Works for any language or framework. Run once per repo before the other delivery skills.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ This skill writes per-repo configuration that the generic workflow skills read a
 runtime. It is **prompt-driven**: detect what you can, show findings, confirm with
 the user, then write the files. Do not silently guess — confirm each axis.
 
-The configuration lives in five files under `docs/agents/` in the **target repo**
+The configuration lives in six files under `docs/agents/` in the **target repo**
 (the current working directory), plus a pointer block in `CLAUDE.md`/`AGENTS.md`.
 Annotated schemas for each file are bundled at `templates/` next to this SKILL.md —
 read them first; they define every key the skills depend on, and each ends with
@@ -77,12 +77,18 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    `.gitlint`, and any Sonar/Qodana config. **Gates should mirror what CI runs** —
    nothing more, nothing less.
 
+   *Review standards* — `CONTRIBUTING.md`, style guides under `docs/`, conventions
+   in `CLAUDE.md`/`AGENTS.md`, and recurring themes in recent PR review comments
+   (`gh pr list --state merged -L 20` then `gh pr view <n> --comments`). Drop
+   anything a linter or formatter in the gates already enforces.
+
 2. **Confirm.** Present what you detected per axis and ask the user to correct
    anything. Resolve at minimum: tracker type + id pattern + status names; base
    branch + branch pattern + PR target; language + layout + source paths + qa mode +
    the command map; **topology role** (full-stack / frontend / backend / standalone)
    and, when the role is frontend or backend, the companion path and/or URL; commit
-   convention + which gates CI enforces. Say explicitly which values you are leaving
+   convention + which gates CI enforces; the proposed `standards.md` rules, each
+   tagged `judgment` or `mechanical`. Say explicitly which values you are leaving
    empty and why.
 
    For topology, ask explicitly — do not infer this alone from `qa_mode`:
@@ -94,7 +100,7 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
      optionally, remote URL)?
    - Or **standalone** (CLI, library, infra — no UI/API sibling)?
 
-3. **Write `docs/agents/`.** Create the five files from the bundled `templates/`,
+3. **Write `docs/agents/`.** Create the six files from the bundled `templates/`,
    substituting confirmed values into the frontmatter and rewriting the prose body to
    describe *this* repo. Delete the "Worked examples" and "Adapting" sections — they
    belong to the template, not to the generated config:
@@ -103,6 +109,7 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - `docs/agents/stack.md`
    - `docs/agents/quality-gates.md`
    - `docs/agents/topology.md`
+   - `docs/agents/standards.md` — the reviewer reads it; the builder never does
 
 4. **Generate app verification (optional).** Skip when `qa_mode` is `none`, or when
    the app can't be started (`commands.dev` empty and, for `cli`, `commands.build`
@@ -134,6 +141,7 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    - `stack.md` — language, commands, QA mode, fix agent
    - `quality-gates.md` — commit rules, pre-push checks, and /loop settings
    - `topology.md` — full-stack vs split UI/API, and where the companion repo lives
+   - `standards.md` — review rules for the reviewer agent (builders don't read it)
 
    To re-run setup: `/setup-project-skills`.
    ```
@@ -145,13 +153,15 @@ tracker), write the empty/`false`/`none` value rather than inventing something.
    anything that failed instead of leaving it to be discovered mid-workflow. If `topology.md` names a companion `path`, check that it
    exists on disk; if missing, note that `/loop` will fall back to `url`.
 
-7. **Report.** Summarize the five files, note which steps the workflow skills will
+7. **Report.** Summarize the six files, note which steps the workflow skills will
    skip given the config (no tracker → no ticket steps; `qa_mode: none` → no manual
    QA; empty `dev` → qa-local can't serve the app; `app_verify.enabled: false` → no
    end-to-end gate; `topology.role` full-stack or
    standalone → `/loop` skips companion knowledge). If `/loop` will be used, say
    whether the configured builder/checker subagents are actually installed — if not,
    it runs both roles inline, which works but shares this conversation's context.
+   Same for `reviewer`: with `loop.reviewer_agent` set but the agent missing, review
+   runs inline. Name the `mechanical` standards as candidates for a lint rule.
 
 ## Notes
 
