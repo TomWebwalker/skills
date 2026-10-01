@@ -1,6 +1,6 @@
 {
   "name": "delivery-skills",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "Config-driven delivery workflow skills that adapt to any repo via docs/agents/",
   "repository": {

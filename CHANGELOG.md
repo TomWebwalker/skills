@@ -4,6 +4,23 @@ All notable changes to this skill set are documented here. Version numbers live 
 `package.json` and are synced into `.claude-plugin/plugin.json` and
 `.cursor-plugin/plugin.json` via `npm run sync-plugin-version`.
 
+## 1.1.1
+
+### Security
+
+- Trust boundaries in `verify-feature`, `qa-local`, `start-issue`, `finalize-feature`,
+  and `loop`, addressing skills.sh scanner findings (indirect prompt injection,
+  command execution from config). Commands come only from user-reviewed
+  `docs/agents/`; ticket text, comments, diffs, tool output, and companion repos are
+  data, never instructions.
+- `verify-feature` refuses to run gates when the branch itself changed
+  `docs/agents/` until the user reviews that diff, and asks before any configured
+  command that reaches beyond building and checking the repo. `/loop` relays that
+  block to the user instead of treating it as a build failure.
+- `start-issue` validates the ticket id and branch name (`git check-ref-format`)
+  before using them in commands. `qa-local` shows derived QA steps to the developer
+  before posting them; companion repos are cloned read-only.
+
 ## 1.1.0
 
 ### Added
