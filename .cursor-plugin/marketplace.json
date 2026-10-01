@@ -11,7 +11,7 @@
       "name": "delivery-skills",
       "source": ".",
       "description": "Config-driven start-issue / verify-feature / qa-local / loop / finalize-feature / retro / handoff workflows with builder, checker, and reviewer agents.",
-      "version": "1.0.0",
+      "version": "1.1.1",
       "author": {
         "name": "Tomasz Flis"
       },
