@@ -30,7 +30,7 @@ plugin), and updates will diverge.
   `reviewer` agents).
   Updates when you bump the plugin version.
 - **skills.sh** — copy editable skill files you own. Pull updates with
-  `npx skills update` when you choose.
+  `npx skills@latest update` when you choose.
 
 ### Option A — install as a plugin (recommended for teams)
 
