@@ -1,8 +1,16 @@
 # Changelog
 
 All notable changes to this skill set are documented here. Version numbers live in
-`package.json` and are synced into `.claude-plugin/plugin.json` and
-`.cursor-plugin/plugin.json` via `npm run sync-plugin-version`.
+`package.json` and are synced into `.claude-plugin/plugin.json`,
+`.cursor-plugin/plugin.json`, and `.cursor-plugin/marketplace.json` via
+`npm run sync-plugin-version`.
+
+## Unreleased
+
+### Changed
+
+- `sync-plugin-version` (and its `--check` in CI) also covers this plugin's entry in
+  `.cursor-plugin/marketplace.json`, which had drifted to `1.0.0`.
 
 ## 1.1.1
 

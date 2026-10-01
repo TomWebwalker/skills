@@ -1,48 +1,54 @@
 #!/usr/bin/env node
-// Copies package.json's version into .claude-plugin/plugin.json and
-// .cursor-plugin/plugin.json. With --check, exits 1 if any differ.
+// Copies package.json's version into .claude-plugin/plugin.json,
+// .cursor-plugin/plugin.json, and this plugin's entry in
+// .cursor-plugin/marketplace.json. With --check, exits 1 if any differ.
+// (.claude-plugin/marketplace.json has no version: Claude reads plugin.json.)
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..");
-const { version } = JSON.parse(
+const { name, version } = JSON.parse(
   readFileSync(join(repo, "package.json"), "utf8"),
 );
 
+// Each target returns the object whose `version` field should match.
 const targets = [
-  join(repo, ".claude-plugin", "plugin.json"),
-  join(repo, ".cursor-plugin", "plugin.json"),
+  { path: join(repo, ".claude-plugin", "plugin.json"), find: (json) => json },
+  { path: join(repo, ".cursor-plugin", "plugin.json"), find: (json) => json },
+  {
+    path: join(repo, ".cursor-plugin", "marketplace.json"),
+    find: (json) => json.plugins?.find((plugin) => plugin.name === name),
+  },
 ];
 
 const check = process.argv.includes("--check");
 let mismatched = false;
 
-for (const pluginPath of targets) {
-  const source = readFileSync(pluginPath, "utf8");
-  const plugin = JSON.parse(source);
+for (const { path, find } of targets) {
+  const json = JSON.parse(readFileSync(path, "utf8"));
+  const entry = find(json);
 
-  if (plugin.version === version) {
-    console.log(`${pluginPath}: ${version} — already in sync`);
+  if (!entry || typeof entry.version !== "string") {
+    console.error(`Could not find a version field for ${name} in ${path}`);
+    process.exit(1);
+  }
+
+  if (entry.version === version) {
+    console.log(`${path}: ${version} — already in sync`);
     continue;
   }
 
   if (check) {
-    console.error(
-      `${pluginPath}: version is ${plugin.version}, package.json is ${version}`,
-    );
+    console.error(`${path}: version is ${entry.version}, package.json is ${version}`);
     mismatched = true;
     continue;
   }
 
-  const updated = source.replace(/("version"\s*:\s*")[^"]*(")/, `$1${version}$2`);
-  if (JSON.parse(updated).version !== version) {
-    console.error(`Could not find a version field to replace in ${pluginPath}`);
-    process.exit(1);
-  }
-  writeFileSync(pluginPath, updated);
-  console.log(`${pluginPath}: synced to ${version}`);
+  entry.version = version;
+  writeFileSync(path, `${JSON.stringify(json, null, 2)}\n`);
+  console.log(`${path}: synced to ${version}`);
 }
 
 if (check && mismatched) {
